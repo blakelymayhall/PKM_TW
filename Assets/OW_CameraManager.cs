@@ -12,7 +12,7 @@ public class OW_CameraManager : MonoBehaviour
     /* PRIVATE VARS */
     //*************************************************************************
     private Vector3 velocity = Vector3.zero;
-    private float smoothTime = 0.3f;
+    private float smoothTime = 0.45f;
     //*************************************************************************
 
     // Start is called before the first frame update
@@ -22,12 +22,10 @@ public class OW_CameraManager : MonoBehaviour
     }
 
     // Use fixed update to prevent camera jumps and glitchy behavior
-    private void FixedUpdate()
+    private void LateUpdate()
     {
-        Vector3 targetPosition = playerPos;
-        targetPosition.z = transform.position.z-10f;
-
         transform.position = Vector3.SmoothDamp(transform.position,
-            targetPosition, ref velocity, smoothTime);
+            playerPos+Vector3.forward*-10f, ref velocity, smoothTime);
+
     }
 }

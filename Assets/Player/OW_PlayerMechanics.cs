@@ -11,7 +11,7 @@ public class OW_PlayerMechanics : MonoBehaviour
 
     /* PRIVATE VARS */
     //*************************************************************************
-    private float playerMoveSpeed = 55;
+    private float playerMoveSpeed = 33;
     private OW_CameraManager cameraManager;
     //*************************************************************************
 
@@ -61,6 +61,6 @@ public class OW_PlayerMechanics : MonoBehaviour
         GetComponent<Rigidbody2D>().freezeRotation = true;
 
         // Force camera to player
-        cameraManager.playerPos = transform.position;
+        cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
     }
 }
