@@ -13,6 +13,7 @@ public class OW_PlayerMechanics : MonoBehaviour
     //*************************************************************************
     private float playerMoveSpeed = 33;
     private OW_CameraManager cameraManager;
+    private List<RaycastHit2D> m_Contacts = new List<RaycastHit2D>();
     //*************************************************************************
 
 
@@ -26,9 +27,18 @@ public class OW_PlayerMechanics : MonoBehaviour
     void Update()
     {
         PlayerMovement();
+
+        // Force camera to player
+        cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
     }
 
-    // Allows player movement via WASD
+    /* PlayerMovement ()
+     * This method updates gameobject's transform via rigid body motion 
+     * Translates the gameobject based on WASD keys
+     * 
+     * Tests to see if the kinematic rigid body is 0.1 units from impacting
+     * another rigid body. If so, halt movement as if struck a wall
+     */
     void PlayerMovement()
     {
         // Initialize to no movement
@@ -54,13 +64,26 @@ public class OW_PlayerMechanics : MonoBehaviour
             moveDirection.Normalize();
         }
 
-        // Move; Don't allow rotation
-        Vector3 target = moveDirection*playerMoveSpeed+transform.position;
-        GetComponent<Rigidbody2D>().MovePosition(Vector3.
-            Lerp(transform.position,target,Time.deltaTime));
-        GetComponent<Rigidbody2D>().freezeRotation = true;
+        // Send cast for all rigid bodies in our line-of-sight
+        m_Contacts.Clear();
+        GetComponent<Rigidbody2D>().
+            Cast(moveDirection.normalized, m_Contacts, playerMoveSpeed);
+        foreach (var contact in m_Contacts)
+        {
+            if (Vector2.Dot(contact.normal, moveDirection) < 0 &&
+                contact.distance <= 0.1)
+            {
+                // Stop movement if within 0.1 units of another rigid body
+                return;
+            }
+        }
 
-        // Force camera to player
-        cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
+        // No contact was found so move freely
+        Vector3 target = moveDirection * playerMoveSpeed + transform.position;
+        GetComponent<Rigidbody2D>().MovePosition(Vector3.
+            Lerp(transform.position, target, Time.deltaTime));
+        GetComponent<Rigidbody2D>().freezeRotation = true;
     }
 }
+
+
