@@ -7,6 +7,7 @@ public enum NPC_Type
     NonProgress,
     Progress,
     Enemy,
+    Monster,
     Recruit
 }
 
