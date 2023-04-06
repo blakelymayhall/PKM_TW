@@ -14,6 +14,8 @@ public class OW_PlayerAnimator : MonoBehaviour
     };
     private int colorIndex = 0;
     private float startTime;
+    private const float walkTime = 0.6f;
+    private const float runTime = 0.3f;
     //*************************************************************************
 
     // Start is called before the first frame update
@@ -56,9 +58,11 @@ public class OW_PlayerAnimator : MonoBehaviour
     {
         if (moving)
         {
-            // Actively walking
+            // Actively moving
             float elapsedTime = Time.time - startTime;
-            if (elapsedTime >= 0.3f)
+            if (elapsedTime >=
+                (GetComponent<OW_PlayerMechanics>().isSprinting ?
+                runTime : walkTime))
             {
                 // Reset start time
                 startTime = Time.time;

@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
-public class SceneManager : MonoBehaviour
+public class OW_SceneManager : MonoBehaviour
 {
     /* PUBLIC VARS */
     //*************************************************************************
-
+    public bool loaded = false;
     //*************************************************************************
 
     /* PRIVATE VARS */
@@ -23,7 +24,13 @@ public class SceneManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        // TODO replace with on impact of an exit
+        // TODO Could I add DontDestroyOnLoad to my scenes rather than program it
+        if(Input.GetKeyDown(KeyCode.Escape) && !loaded)
+        {
+            loaded = true;
+            SceneManager.LoadScene("OverworldSandbox1");
+        }
     }
 }
 
