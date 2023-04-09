@@ -2,6 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum PlayerMoveDirection
+{
+    Up,
+    Right,
+    Down,
+    Left,
+    Static
+}
+
 public class OW_PlayerAnimator : MonoBehaviour
 {
     /* PRIVATE VARS */
@@ -16,6 +25,8 @@ public class OW_PlayerAnimator : MonoBehaviour
     private float startTime;
     private const float walkTime = 0.6f;
     private const float runTime = 0.3f;
+    private PlayerMoveDirection moveDirection =
+        PlayerMoveDirection.Static;
     //*************************************************************************
 
     // Start is called before the first frame update
@@ -28,24 +39,34 @@ public class OW_PlayerAnimator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        bool movingLeft =
-            GetComponent<OW_PlayerMechanics>().moveDirection.x < 0;
-        bool movingRight =
-            GetComponent<OW_PlayerMechanics>().moveDirection.x > 0;
-        bool movingUp =
-            GetComponent<OW_PlayerMechanics>().moveDirection.y > 0;
-        bool movingDown =
-            GetComponent<OW_PlayerMechanics>().moveDirection.y < 0;
-        bool moving = movingLeft || movingRight || movingUp || movingDown;
+        if(GetComponent<OW_PlayerMechanics>().moveDirection.x < 0)
+        {
+            moveDirection = PlayerMoveDirection.Left;
+        }
+        else if(GetComponent<OW_PlayerMechanics>().moveDirection.x > 0)
+        {
+            moveDirection = PlayerMoveDirection.Right;
+        }
+        else if (GetComponent<OW_PlayerMechanics>().moveDirection.y > 0)
+        {
+            moveDirection = PlayerMoveDirection.Up;
+        }
+        else if (GetComponent<OW_PlayerMechanics>().moveDirection.y < 0)
+        {
+            moveDirection = PlayerMoveDirection.Down;
+        }
+        else 
+        {
+            moveDirection = PlayerMoveDirection.Static;
+        }
 
-        AnimateSteps(moving);
-        ChangePlayerDirection(movingLeft, movingRight, movingUp, movingDown);
+        AnimatePlayer();
     }
 
     /*
-     * Animate Steps ( bool ) 
-     * This method accepts a boolean parameter that is true if the gameObject
-     * is moving (OW_PlayerMechanicsfield moveDirection == nonZero).
+     * Animate Steps ( ) 
+     * 
+     * This method checks the moveDirection for Static or moving
      * 
      * If the gameObject is moving, the method will alternate the color of the 
      * sprite every one second while moving. 
@@ -54,9 +75,9 @@ public class OW_PlayerAnimator : MonoBehaviour
      * 
      * This simulates using sprites for walking and being stationary.
      */
-    void AnimateSteps(bool moving)
+    void AnimatePlayer()
     {
-        if (moving)
+        if (moveDirection != PlayerMoveDirection.Static)
         {
             // Actively moving
             float elapsedTime = Time.time - startTime;
@@ -65,13 +86,14 @@ public class OW_PlayerAnimator : MonoBehaviour
                 runTime : walkTime))
             {
                 // Reset start time
-                startTime = Time.time;
+                startTime = 0;
 
                 // Flip colorIndex
                 colorIndex = (colorIndex == 0) ? 1 : 0;
             }
 
             spriteRenderer.color = spriteColors[colorIndex];
+            ChangePlayerDirection();
         }
         else
         {
@@ -81,9 +103,11 @@ public class OW_PlayerAnimator : MonoBehaviour
     }
 
     /*
-     * ChangePlayerDirection ( bool , bool , bool, bool) 
-     * This method accepts four boolean parameters. Only one of them will be 
-     * true at a time. Whichever one it is will be used to establish a target 
+     * ChangePlayerDirection () 
+     * 
+     * This method checks the moveDirection for direction the player is moving
+     * 
+     * Whichever direction it is will be used to establish a target 
      * vector in the appropriate direction. The gameObject's orientation will
      * be rotated to the target orientaiton
      * 
@@ -92,27 +116,26 @@ public class OW_PlayerAnimator : MonoBehaviour
      * vector. The body is rotated through the delta
      * 
      */
-    void ChangePlayerDirection(bool movingLeft, bool movingRight,
-        bool movingUp, bool movingDown)
+    void ChangePlayerDirection()
     {
         Vector2 currentDirection = transform.up;
         Vector2 targetDirection = currentDirection;
-        if (movingLeft)
+        if (moveDirection == PlayerMoveDirection.Left)
         {
             // Face left
             targetDirection = Vector2.left;
         }
-        else if (movingRight)
+        else if (moveDirection == PlayerMoveDirection.Right)
         {
             // Face right
             targetDirection = Vector2.right;
         }
-        else if (movingUp)
+        else if (moveDirection == PlayerMoveDirection.Up)
         {
             // Face up
             targetDirection = Vector2.up;
         }
-        else if (movingDown)
+        else if (moveDirection == PlayerMoveDirection.Down)
         {
             // Face down
             targetDirection = Vector2.down;
