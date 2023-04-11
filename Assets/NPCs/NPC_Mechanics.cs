@@ -2,30 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum NPC_SpinDirection
-{
-    Up,
-    Right,
-    Down,
-    Left
-}
-
 public class NPC_Mechanics : MonoBehaviour
 {
     /* PUBLIC VARS */
     //*************************************************************************
     // Wander Mechanics
     public bool isWander = false;
+    public List<Vector3> waypoints = new List<Vector3>();
+    public Vector3 target = new Vector3();
 
     // Spin Mechanics
     public bool isSpin = false;
-    public List<NPC_SpinDirection> spinDirections =
-        new List<NPC_SpinDirection>();
+    public List<MovementDirections> spinDirections =
+        new List<MovementDirections>();
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
-    private float npcMoveSpeed = 0;
+    // Wander mechanics
+    private Vector3 moveDirection = new Vector3();
+    private int waypointIndex = 1;
+    private float npcMoveSpeed = 2;
     private List<RaycastHit2D> m_Contacts = new List<RaycastHit2D>();
 
     // Spin Mechanics
@@ -41,34 +38,12 @@ public class NPC_Mechanics : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        // DEBUG //
-        // ///// //
-        GetComponent<Rigidbody2D>().freezeRotation = true;
-
-        Vector3 target = new Vector3(0, -1, 0)*npcMoveSpeed+transform.position;
-
-        // Test to see if we've impacted something
-        m_Contacts.Clear();
-        GetComponent<Rigidbody2D>().
-            Cast(target.normalized, m_Contacts, npcMoveSpeed);
-        foreach (var contact in m_Contacts)
+        if (isWander)
         {
-            if (Vector2.Dot(contact.normal, target) < 0 &&
-                contact.distance <= 0.1)
-            {
-                // Stop movement if within 0.1 units of another rigid body
-                return;
-            }
+            Wander();
         }
-
-        // No contact was found so move freely
-        GetComponent<Rigidbody2D>().MovePosition(Vector3.
-            Lerp(transform.position, target, Time.deltaTime));
-
-        // END DEBUG //
-        // /// ///// //
         
         if (isSpin)
         {
@@ -84,7 +59,8 @@ public class NPC_Mechanics : MonoBehaviour
      * 2) SPIN - Rotates through directions defined in class parameters 
      * 3) STATIC - Uncoded, just looks in one direction
      *  
-     * 4) PLAYER_SPOTTED - An enemy catches the player in the LOS and walks to them
+     * 4) PLAYER_SPOTTED - An enemy catches the player in the LOS and walks to 
+     * them
      * 
      */
 
@@ -99,7 +75,42 @@ public class NPC_Mechanics : MonoBehaviour
      */
     void Wander()
     {
+        if(Vector3.Distance(transform.position, waypoints[waypointIndex])
+            >= 0.1)
+        {
+            moveDirection = (waypoints[waypointIndex] -
+                transform.position).normalized;
 
+            // Test to see if we've impacted something
+            m_Contacts.Clear();
+            GetComponent<Rigidbody2D>().
+                Cast(moveDirection, m_Contacts, npcMoveSpeed);
+            foreach (var contact in m_Contacts)
+            {
+                if (Vector2.Dot(contact.normal, moveDirection) < 0 &&
+                    contact.distance <= npcMoveSpeed*Time.fixedDeltaTime*1.1)
+                {
+                    // Stop movement if within 0.1 units of another rigid body
+                    return;
+                }
+            }
+
+            // No contact was found so move freely
+            target = moveDirection * npcMoveSpeed + transform.position;
+            GetComponent<Rigidbody2D>().MovePosition(Vector3.
+                Lerp(transform.position, target, Time.fixedDeltaTime));
+            OW_Globals.RotateSprite(gameObject,
+                OW_Globals.GetDirection((waypoints[waypointIndex] -
+                transform.position).normalized));
+        }
+        else
+        {
+            waypointIndex++;
+            if (waypointIndex >= waypoints.Count)
+            {
+                waypointIndex = 0;
+            }
+        }
     }
 
     /* Spin () 
@@ -108,42 +119,13 @@ public class NPC_Mechanics : MonoBehaviour
      * spin method rotates the NPC through the list of angles defined in the 
      * parameters.
      * 
-     * TODO Clean this up. This code is almost common with the player animator
-     * AND I think that you could achieve this is less lines with switch maybe? 
-     * 
      */
     void Spin()
     {
         float elapsedTime = Time.time - startTime;
         if(elapsedTime >= spinTime)
         {
-            Vector2 currentDirection = transform.up;
-            Vector2 targetDirection = currentDirection;
-            if (spinDirections[spinIndex] == NPC_SpinDirection.Left)
-            {
-                // Face left
-                targetDirection = Vector2.left;
-            }
-            else if (spinDirections[spinIndex] == NPC_SpinDirection.Right)
-            {
-                // Face right
-                targetDirection = Vector2.right;
-            }
-            else if (spinDirections[spinIndex] == NPC_SpinDirection.Up)
-            {
-                // Face up
-                targetDirection = Vector2.up;
-            }
-            else if (spinDirections[spinIndex] == NPC_SpinDirection.Down)
-            {
-                // Face down
-                targetDirection = Vector2.down;
-            }
-
-            float angle =
-                Vector2.SignedAngle(currentDirection, targetDirection);
-            transform.Rotate(0f, 0f, angle);
-
+            OW_Globals.RotateSprite(gameObject, spinDirections[spinIndex]);
             spinIndex++;
             if(spinIndex >= spinDirections.Count)
             {

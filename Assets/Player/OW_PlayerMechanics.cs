@@ -13,8 +13,8 @@ public class OW_PlayerMechanics : MonoBehaviour
     /* PRIVATE VARS */
     //*************************************************************************
     private float playerSpeed;
-    private const float playerSprintSpeed = 55;
-    private const float playerWalkSpeed = 33;
+    private const float playerSprintSpeed = 3;
+    private const float playerWalkSpeed = 2;
     private OW_CameraManager cameraManager;
     private List<RaycastHit2D> m_Contacts = new List<RaycastHit2D>();
     //*************************************************************************
@@ -33,7 +33,7 @@ public class OW_PlayerMechanics : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         PlayerMovement();
 
@@ -88,7 +88,7 @@ public class OW_PlayerMechanics : MonoBehaviour
         foreach (var contact in m_Contacts)
         {
             if (Vector2.Dot(contact.normal, moveDirection) < 0 &&
-                contact.distance <= 0.1)
+                contact.distance <= playerSpeed*Time.fixedDeltaTime*1.1)
             {
                 // Stop movement if within 0.1 units of another rigid body
                 return;
@@ -99,7 +99,8 @@ public class OW_PlayerMechanics : MonoBehaviour
         Vector3 target = moveDirection * playerSpeed + transform.position;
         GetComponent<Rigidbody2D>().MovePosition(Vector3.
             Lerp(transform.position, target, Time.deltaTime));
-        GetComponent<Rigidbody2D>().freezeRotation = true;
+        OW_Globals.RotateSprite(gameObject,
+            OW_Globals.GetDirection(moveDirection));
     }
 }
 

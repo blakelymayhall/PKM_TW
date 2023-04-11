@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1572203962058635717}
   - component: {fileID: -8414274772652233077}
   - component: {fileID: 8912494214164238869}
+  - component: {fileID: 6466904474790272535}
   m_Layer: 0
   m_Name: OW_NPC
   m_TagString: Player
@@ -158,5 +159,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 832c1abb8bdd14e05a604464d95749e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isWander: 0
+  waypoints: []
+  target: {x: 0, y: 0, z: 0}
+  isSpin: 0
+  spinDirections: 
+--- !u!114 &6466904474790272535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5077362107726169654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a60d8e503c7174df5b12bf6ac47e57c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OW_PlayerAnimator : MonoBehaviour
+public class NPC_Animator : MonoBehaviour
 {
     /* PRIVATE VARS */
     //*************************************************************************
@@ -14,7 +14,6 @@ public class OW_PlayerAnimator : MonoBehaviour
     private int colorIndex = 0;
     private float startTime;
     private const float walkTime = 0.6f;
-    private const float runTime = 0.3f;
     private MovementDirections moveDirection =
         MovementDirections.Static;
     //*************************************************************************
@@ -23,15 +22,19 @@ public class OW_PlayerAnimator : MonoBehaviour
     void Start()
     {
         startTime = Time.time;
+        if (!GetComponent<NPC_Mechanics>().isWander)
+        {
+            enabled = false;
+        }
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         moveDirection = OW_Globals.GetDirection(
-            GetComponent<OW_PlayerMechanics>().moveDirection);
+            GetComponent<NPC_Mechanics>().target);
 
-        AnimatePlayer();
+        AnimateNPC();
     }
 
     /*
@@ -46,15 +49,13 @@ public class OW_PlayerAnimator : MonoBehaviour
      * 
      * This simulates using sprites for walking and being stationary.
      */
-    void AnimatePlayer()
+    void AnimateNPC()
     {
         if (moveDirection != MovementDirections.Static)
         {
             // Actively moving
             float elapsedTime = Time.time - startTime;
-            if (elapsedTime >=
-                (GetComponent<OW_PlayerMechanics>().isSprinting ?
-                runTime : walkTime))
+            if (elapsedTime >= walkTime)
             {
                 // Reset start time
                 startTime = Time.time;
