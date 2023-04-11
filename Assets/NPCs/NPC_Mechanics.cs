@@ -9,18 +9,20 @@ public class NPC_Mechanics : MonoBehaviour
     // Wander Mechanics
     public bool isWander = false;
     public List<Vector3> waypoints = new List<Vector3>();
-    public Vector3 target = new Vector3();
+    public Vector3 moveDirection = new Vector3();
 
     // Spin Mechanics
     public bool isSpin = false;
     public List<MovementDirections> spinDirections =
         new List<MovementDirections>();
+
+    // Player Spotting Mechanics
+    public float spotDistance = 3f;
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
     // Wander mechanics
-    private Vector3 moveDirection = new Vector3();
     private int waypointIndex = 1;
     private float npcMoveSpeed = 2;
     private List<RaycastHit2D> m_Contacts = new List<RaycastHit2D>();
@@ -40,6 +42,11 @@ public class NPC_Mechanics : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (GetComponent<NPC_Identity>().npc_types.Contains(NPC_Type.Enemy))
+        {
+            PlayerSpotted();
+        }
+            
         if (isWander)
         {
             Wander();
@@ -96,7 +103,7 @@ public class NPC_Mechanics : MonoBehaviour
             }
 
             // No contact was found so move freely
-            target = moveDirection * npcMoveSpeed + transform.position;
+            Vector3 target = moveDirection * npcMoveSpeed + transform.position;
             GetComponent<Rigidbody2D>().MovePosition(Vector3.
                 Lerp(transform.position, target, Time.fixedDeltaTime));
             OW_Globals.RotateSprite(gameObject,
@@ -149,6 +156,13 @@ public class NPC_Mechanics : MonoBehaviour
      */
     void PlayerSpotted()
     {
+        Vector3 facingDirection = gameObject.transform.up;
 
+        // Test to see if there is something in our direction
+        m_Contacts.Clear();
+        GetComponent<Rigidbody2D>().
+            Cast(facingDirection, m_Contacts, spotDistance);
+        //if (m_Contacts is the player object start doing stuff like
+            // stop the player movement, move the npc to the player, initiate dialogue
     }
 }

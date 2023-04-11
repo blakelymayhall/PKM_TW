@@ -32,7 +32,7 @@ public class NPC_Animator : MonoBehaviour
     void FixedUpdate()
     {
         moveDirection = OW_Globals.GetDirection(
-            GetComponent<NPC_Mechanics>().target);
+            GetComponent<NPC_Mechanics>().moveDirection);
 
         AnimateNPC();
     }
