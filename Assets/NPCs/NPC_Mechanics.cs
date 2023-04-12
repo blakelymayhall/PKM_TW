@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class NPC_Mechanics : MonoBehaviour
@@ -31,6 +32,8 @@ public class NPC_Mechanics : MonoBehaviour
     private int spinIndex = 1;
     private float startTime;
     private float spinTime = 2f;
+
+    private bool isStuck = false;
     //*************************************************************************
 
     // Start is called before the first frame update
@@ -42,7 +45,8 @@ public class NPC_Mechanics : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (GetComponent<NPC_Identity>().npc_types.Contains(NPC_Type.Enemy))
+        if (GetComponent<NPC_Identity>().npc_types.Contains(NPC_Type.Enemy)
+            && !isStuck)
         {
             PlayerSpotted();
         }
@@ -85,30 +89,7 @@ public class NPC_Mechanics : MonoBehaviour
         if(Vector3.Distance(transform.position, waypoints[waypointIndex])
             >= 0.1)
         {
-            moveDirection = (waypoints[waypointIndex] -
-                transform.position).normalized;
-
-            // Test to see if we've impacted something
-            m_Contacts.Clear();
-            GetComponent<Rigidbody2D>().
-                Cast(moveDirection, m_Contacts, npcMoveSpeed);
-            foreach (var contact in m_Contacts)
-            {
-                if (Vector2.Dot(contact.normal, moveDirection) < 0 &&
-                    contact.distance <= npcMoveSpeed*Time.fixedDeltaTime*1.1)
-                {
-                    // Stop movement if within 0.1 units of another rigid body
-                    return;
-                }
-            }
-
-            // No contact was found so move freely
-            Vector3 target = moveDirection * npcMoveSpeed + transform.position;
-            GetComponent<Rigidbody2D>().MovePosition(Vector3.
-                Lerp(transform.position, target, Time.fixedDeltaTime));
-            OW_Globals.RotateSprite(gameObject,
-                OW_Globals.GetDirection((waypoints[waypointIndex] -
-                transform.position).normalized));
+            NPC_Move(waypoints[waypointIndex]);
         }
         else
         {
@@ -146,12 +127,12 @@ public class NPC_Mechanics : MonoBehaviour
     /* PlayerSpotted () 
      * 
      * The PlayerSpotted method is used for all enemy NPC's set to either 
-     * the wander setting, rotate, or static setting. The 
-     * PlayerSpotted method moves the NPC adjacent to the player prior to 
+     * the wander setting, rotate, or static setting. It checks its LOS for
+     * the lpayer and then the  moves the NPC adjacent to the player prior to 
      * starting dialouge and battle.
      * 
-     * This method should only operate once during the game unless a method for
-     * replaying battles is established
+     * This method should only fully operate once per NPC during the game
+     * unless a method for replaying battles is established
      * 
      */
     void PlayerSpotted()
@@ -159,10 +140,81 @@ public class NPC_Mechanics : MonoBehaviour
         Vector3 facingDirection = gameObject.transform.up;
 
         // Test to see if there is something in our direction
+        // todo, you can probably add a filter to only check for the player
         m_Contacts.Clear();
         GetComponent<Rigidbody2D>().
             Cast(facingDirection, m_Contacts, spotDistance);
-        //if (m_Contacts is the player object start doing stuff like
-            // stop the player movement, move the npc to the player, initiate dialogue
+        RaycastHit2D playerHit = m_Contacts.SingleOrDefault(x =>
+            x.collider.gameObject.name == "OW_Player");
+        if (playerHit.collider != null)
+        {
+            GameObject playerObject = playerHit.collider.gameObject;
+            var crossP = Vector3.Cross(
+                playerObject.transform.position-transform.position,
+                facingDirection);
+            if (Vector3.Magnitude(crossP) <= 0.1)
+            {
+                // Start timer
+                if (playerObject.GetComponent<OW_PlayerMechanics>().
+                    isSpotted == false)
+                {
+                    startTime = Time.time;
+                }
+
+                isWander = false;
+                isSpin = false;
+                playerObject.GetComponent<OW_PlayerMechanics>().
+                    isSpotted = true;
+
+                // Wait 1.3 seconds from time of spot
+                if (Time.time - startTime <= 1.3f)
+                    return;
+
+                // todo only move along the facing axis, unless you perfect the
+                // spotting code
+                NPC_Move(playerObject.transform.position);
+                if(isStuck)
+                {
+                    // TODO turn off NPC animator 
+                    GetComponent<SpriteRenderer>().color = Color.cyan;
+                    // TODO initiate dialogue
+                    // TODO load battle scene
+                }
+            }
+        }
+    }
+
+
+    /* NPC_Move()
+     * Moves the NPC in the direction of the waypoint
+     * 
+     * Tests to see if the kinematic rigid body is 0.1 units from impacting
+     * another rigid body.If so, halt movement as if struck a wall
+     */
+    void NPC_Move(Vector3 waypoint)
+    {
+        moveDirection = (waypoint - transform.position).normalized;
+
+        // Test to see if we've impacted something
+        m_Contacts.Clear();
+        GetComponent<Rigidbody2D>().
+            Cast(moveDirection, m_Contacts, npcMoveSpeed);
+        foreach (var contact in m_Contacts)
+        {
+            if (Vector2.Dot(contact.normal, moveDirection) < 0 &&
+                contact.distance <= npcMoveSpeed * Time.fixedDeltaTime * 1.1)
+            {
+                isStuck = true;
+                return;
+            }
+        }
+
+        // No contact was found so move freely
+        isStuck = false;
+        Vector3 target = moveDirection * npcMoveSpeed + transform.position;
+        GetComponent<Rigidbody2D>().MovePosition(Vector3.
+            Lerp(transform.position, target, Time.fixedDeltaTime));
+        OW_Globals.RotateSprite(gameObject, OW_Globals.GetDirection(
+            (waypoint - transform.position).normalized));
     }
 }

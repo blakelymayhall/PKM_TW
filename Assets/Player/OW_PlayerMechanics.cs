@@ -8,6 +8,7 @@ public class OW_PlayerMechanics : MonoBehaviour
     //*************************************************************************
     public Vector3 moveDirection;
     public bool isSprinting = false;
+    public bool isSpotted = false;
     //*************************************************************************
 
     /* PRIVATE VARS */
@@ -35,7 +36,13 @@ public class OW_PlayerMechanics : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        PlayerMovement();
+        // Initialize to no movement
+        moveDirection = Vector3.zero;
+
+        if (!isSpotted)
+        {
+            PlayerMovement();
+        }
 
         // Force camera to player
         cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
@@ -50,9 +57,6 @@ public class OW_PlayerMechanics : MonoBehaviour
      */
     void PlayerMovement()
     {
-        // Initialize to no movement
-        moveDirection = Vector3.zero;
-
         // If shift is held, sprint
         if(Input.GetButton("Run"))
         {
