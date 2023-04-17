@@ -33,20 +33,23 @@ public class NPC_Mechanics : MonoBehaviour
     private float startTime;
     private float spinTime = 2f;
 
-    private bool isStuck = false;
+    // Player Spotting Mechanics
+    private bool playerSpotted = false;
+    private bool playerEngaged = false;
     //*************************************************************************
 
     // Start is called before the first frame update
     void Start()
     {
         startTime = Time.time;
+        moveDirection = Vector3.zero;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         if (GetComponent<NPC_Identity>().npc_types.Contains(NPC_Type.Enemy)
-            && !isStuck)
+            && !playerEngaged)
         {
             PlayerSpotted();
         }
@@ -139,8 +142,7 @@ public class NPC_Mechanics : MonoBehaviour
     {
         Vector3 facingDirection = gameObject.transform.up;
 
-        // Test to see if there is something in our direction
-        // todo, you can probably add a filter to only check for the player
+        // Test to see if player is in our facing direction
         m_Contacts.Clear();
         GetComponent<Rigidbody2D>().
             Cast(facingDirection, m_Contacts, spotDistance);
@@ -148,12 +150,19 @@ public class NPC_Mechanics : MonoBehaviour
             x.collider.gameObject.name == "OW_Player");
         if (playerHit.collider != null)
         {
+            // found player 
             GameObject playerObject = playerHit.collider.gameObject;
             var crossP = Vector3.Cross(
                 playerObject.transform.position-transform.position,
                 facingDirection);
+
+            // test to see if looking at center of player
             if (Vector3.Magnitude(crossP) <= 0.1)
             {
+                // Caught center of player. Stop player and wait for 1.3 sec
+                // then walk up to them
+                playerSpotted = true;
+
                 // Start timer
                 if (playerObject.GetComponent<OW_PlayerMechanics>().
                     isSpotted == false)
@@ -170,17 +179,26 @@ public class NPC_Mechanics : MonoBehaviour
                 if (Time.time - startTime <= 1.3f)
                     return;
 
-                // todo only move along the facing axis, unless you perfect the
-                // spotting code
+                // This may have issue with moving out-of plane if player
+                // spotted code doesn't get the exact center of collider
+
                 NPC_Move(playerObject.transform.position);
-                if(isStuck)
+                if(playerEngaged)
                 {
-                    // TODO turn off NPC animator 
+                    moveDirection = Vector3.zero;
                     GetComponent<SpriteRenderer>().color = Color.cyan;
                     // TODO initiate dialogue
                     // TODO load battle scene
                 }
             }
+            else
+            {
+                playerSpotted = false;
+            }
+        }
+        else
+        {
+            playerSpotted = false;
         }
     }
 
@@ -204,13 +222,13 @@ public class NPC_Mechanics : MonoBehaviour
             if (Vector2.Dot(contact.normal, moveDirection) < 0 &&
                 contact.distance <= npcMoveSpeed * Time.fixedDeltaTime * 1.1)
             {
-                isStuck = true;
+                playerEngaged = playerSpotted;
                 return;
             }
         }
 
         // No contact was found so move freely
-        isStuck = false;
+        playerEngaged = false;
         Vector3 target = moveDirection * npcMoveSpeed + transform.position;
         GetComponent<Rigidbody2D>().MovePosition(Vector3.
             Lerp(transform.position, target, Time.fixedDeltaTime));

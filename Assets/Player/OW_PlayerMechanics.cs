@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,8 +15,10 @@ public class OW_PlayerMechanics : MonoBehaviour
     /* PRIVATE VARS */
     //*************************************************************************
     private float playerSpeed;
-    private const float playerSprintSpeed = 3;
-    private const float playerWalkSpeed = 2;
+    public Vector3 target1;
+    public Vector3 target2;
+    public float playerSprintSpeed = 16f;
+    public float playerWalkSpeed = 12f;
     private OW_CameraManager cameraManager;
     private List<RaycastHit2D> m_Contacts = new List<RaycastHit2D>();
     //*************************************************************************
@@ -30,13 +33,14 @@ public class OW_PlayerMechanics : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        target1 = transform.position;
+        target2 = transform.position;
         cameraManager = Camera.main.GetComponent<OW_CameraManager>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        // Initialize to no movement
         moveDirection = Vector3.zero;
 
         if (!isSpotted)
@@ -85,26 +89,55 @@ public class OW_PlayerMechanics : MonoBehaviour
             moveDirection.Normalize();
         }
 
-        // Send cast for all rigid bodies in our line-of-sight
-        m_Contacts.Clear();
-        GetComponent<Rigidbody2D>().
-            Cast(moveDirection.normalized, m_Contacts, playerSpeed);
-        foreach (var contact in m_Contacts)
+        if (moveDirection == Vector3.zero)
         {
-            if (Vector2.Dot(contact.normal, moveDirection) < 0 &&
-                contact.distance <= playerSpeed*Time.fixedDeltaTime*1.1)
+            // Not actively moving
+            if (Vector3.Distance(transform.position, target2) >= 1e-3)
             {
-                // Stop movement if within 0.1 units of another rigid body
+                var test3 = Math.Abs(Math.IEEERemainder((double)target2.x, 0.8d)) <= 1e-3;
+                var test4 = Math.Abs(Math.IEEERemainder((double)target2.y, 0.8d)) <= 1e-3;
+                if (test3 && test4)
+                {
+                    GetComponent<Rigidbody2D>().MovePosition(
+                        Vector3.Lerp(transform.position, target2,
+                        playerSpeed * Time.fixedDeltaTime));
+                }
                 return;
+            }
+            else
+            {
+                // snap to target and be done moving
+                GetComponent<Rigidbody2D>().MovePosition(target2);
+                transform.position = target2;
+                target1 = target2;
+                return;
+            }
+
+        }
+        else
+        {
+
+
+            // No contact was found so move freely
+            target2 = moveDirection * 0.8f + target1;
+
+            var test1 = Math.Abs(Math.IEEERemainder((double)target2.x, 0.8d)) <= 1e-2;
+            var test2 = Math.Abs(Math.IEEERemainder((double)target2.y, 0.8d)) <= 1e-2;
+            if (test1 && test2)
+            {
+                GetComponent<Rigidbody2D>().MovePosition(
+                    Vector3.Lerp(transform.position, target2,
+                    playerSpeed * Time.fixedDeltaTime));
             }
         }
 
-        // No contact was found so move freely
-        Vector3 target = moveDirection * playerSpeed + transform.position;
-        GetComponent<Rigidbody2D>().MovePosition(Vector3.
-            Lerp(transform.position, target, Time.deltaTime));
-        OW_Globals.RotateSprite(gameObject,
-            OW_Globals.GetDirection(moveDirection));
+        //OW_Globals.RotateSprite(gameObject,
+    //OW_Globals.GetDirection(moveDirection));
+
+        if (Vector3.Distance(transform.position, target2) <= 1e-3)
+        {
+            target1 = target2;
+        }
     }
 }
 

@@ -22,18 +22,11 @@ public class NPC_Animator : MonoBehaviour
     void Start()
     {
         startTime = Time.time;
-        if (!GetComponent<NPC_Mechanics>().isWander)
-        {
-            enabled = false;
-        }
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        moveDirection = OW_Globals.GetDirection(
-            GetComponent<NPC_Mechanics>().moveDirection);
-
         AnimateNPC();
     }
 
@@ -51,6 +44,9 @@ public class NPC_Animator : MonoBehaviour
      */
     void AnimateNPC()
     {
+        moveDirection = OW_Globals.GetDirection(
+            GetComponent<NPC_Mechanics>().moveDirection);
+
         if (moveDirection != MovementDirections.Static)
         {
             // Actively moving
@@ -69,7 +65,7 @@ public class NPC_Animator : MonoBehaviour
         else
         {
             // Not walking
-            GetComponent<SpriteRenderer>().color = Color.black;
+            GetComponent<SpriteRenderer>().color = Color.gray;
         }
     }
 }
