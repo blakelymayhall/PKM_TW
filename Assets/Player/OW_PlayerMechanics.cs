@@ -15,6 +15,7 @@ public class OW_PlayerMechanics : MonoBehaviour
     /* PRIVATE VARS */
     //*************************************************************************
     private float playerSpeed;
+    private bool isMoving;
     public Vector3 target1;
     public Vector3 target2;
     public float playerSprintSpeed = 16f;
@@ -33,6 +34,8 @@ public class OW_PlayerMechanics : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        isMoving = false;
+        moveDirection = Vector3.zero;
         target1 = transform.position;
         target2 = transform.position;
         cameraManager = Camera.main.GetComponent<OW_CameraManager>();
@@ -41,12 +44,8 @@ public class OW_PlayerMechanics : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        moveDirection = Vector3.zero;
 
-        if (!isSpotted)
-        {
-            PlayerMovement();
-        }
+        PlayerMovement();
 
         // Force camera to player
         cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
@@ -61,7 +60,7 @@ public class OW_PlayerMechanics : MonoBehaviour
      */
     void PlayerMovement()
     {
-        // If shift is held, sprint
+        // Set Player Speed
         if(Input.GetButton("Run"))
         {
             playerSpeed = playerSprintSpeed;
@@ -73,51 +72,35 @@ public class OW_PlayerMechanics : MonoBehaviour
             isSprinting = false;
         }
 
+        // Get User Input
+        Vector3 inputDirection = new Vector3();
+
         // If horizontal pressed, move horizontal
         if (Input.GetButton("Horizontal"))
         {
-            moveDirection.x = Input.GetAxis("Horizontal");
-            moveDirection.y = 0;
-            moveDirection.Normalize();
+            inputDirection.x = Input.GetAxis("Horizontal");
+            inputDirection.y = 0;
+            inputDirection.Normalize();
         }
 
         // If vertical pressed, move vertical
         if (Input.GetButton("Vertical"))
         {
-            moveDirection.x = 0;
-            moveDirection.y = Input.GetAxis("Vertical");
-            moveDirection.Normalize();
+            inputDirection.x = 0;
+            inputDirection.y = Input.GetAxis("Vertical");
+            inputDirection.Normalize();
         }
 
-        if (moveDirection == Vector3.zero)
+        if (inputDirection != Vector3.zero)
         {
-            // Not actively moving
-            if (Vector3.Distance(transform.position, target2) >= 1e-3)
+            if (!isMoving)
             {
-                var test3 = Math.Abs(Math.IEEERemainder((double)target2.x, 0.8d)) <= 1e-3;
-                var test4 = Math.Abs(Math.IEEERemainder((double)target2.y, 0.8d)) <= 1e-3;
-                if (test3 && test4)
-                {
-                    GetComponent<Rigidbody2D>().MovePosition(
-                        Vector3.Lerp(transform.position, target2,
-                        playerSpeed * Time.fixedDeltaTime));
-                }
+                // First pass of movement
+                moveDirection = inputDirection;
+                isMoving = true;
                 return;
             }
-            else
-            {
-                // snap to target and be done moving
-                GetComponent<Rigidbody2D>().MovePosition(target2);
-                transform.position = target2;
-                target1 = target2;
-                return;
-            }
-
-        }
-        else
-        {
-
-
+            
             // No contact was found so move freely
             target2 = moveDirection * 0.8f + target1;
 
@@ -129,10 +112,35 @@ public class OW_PlayerMechanics : MonoBehaviour
                     Vector3.Lerp(transform.position, target2,
                     playerSpeed * Time.fixedDeltaTime));
             }
+            
         }
 
-        //OW_Globals.RotateSprite(gameObject,
-    //OW_Globals.GetDirection(moveDirection));
+        if (inputDirection == Vector3.zero || inputDirection != moveDirection)
+        {
+            // Not actively moving
+
+            if (Vector3.Distance(transform.position, target2) >= 1e-3)
+            {
+                // Move through to previously set target
+                var test3 = Math.Abs(Math.IEEERemainder((double)target2.x, 0.8d)) <= 1e-3;
+                var test4 = Math.Abs(Math.IEEERemainder((double)target2.y, 0.8d)) <= 1e-3;
+                if (test3 && test4)
+                {
+                    GetComponent<Rigidbody2D>().MovePosition(
+                        Vector3.Lerp(transform.position, target2,
+                        playerSpeed * Time.fixedDeltaTime));
+                }
+            }
+            else
+            {
+                // snap to target and be done moving
+                GetComponent<Rigidbody2D>().MovePosition(target2);
+                transform.position = target2;
+                target1 = target2;
+                isMoving = false;
+                moveDirection = Vector3.zero;
+            }
+        }
 
         if (Vector3.Distance(transform.position, target2) <= 1e-3)
         {

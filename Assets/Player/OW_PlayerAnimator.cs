@@ -16,7 +16,9 @@ public class OW_PlayerAnimator : MonoBehaviour
     public float walkTime = 0.4f;
     private float runTime = 0.23f;
     private MovementDirections moveDirection =
-    MovementDirections.Static;
+        MovementDirections.Static;
+    private MovementDirections lastMoveDirection =
+        MovementDirections.Static;
     private List<Sprite> directionSprites = new List<Sprite>();
     //*************************************************************************
 
@@ -34,6 +36,8 @@ public class OW_PlayerAnimator : MonoBehaviour
             GetComponent<OW_PlayerMechanics>().moveDirection);
 
         AnimatePlayer();
+
+        lastMoveDirection = moveDirection;
     }
 
     /*
@@ -41,7 +45,8 @@ public class OW_PlayerAnimator : MonoBehaviour
      * 
      */
     void AnimatePlayer()
-    { 
+    {
+
         if (moveDirection == MovementDirections.Left)
         {
             directionSprites = sprites.GetRange(8, 4);
