@@ -15,10 +15,8 @@ public class OW_PlayerAnimator : MonoBehaviour
     private float startTime;
     public float walkTime = 0.4f;
     private float runTime = 0.23f;
-    private MovementDirections moveDirection =
-        MovementDirections.Static;
-    private MovementDirections lastMoveDirection =
-        MovementDirections.Static;
+    private MovementDirections facingDirection =
+        MovementDirections.NaN;
     private List<Sprite> directionSprites = new List<Sprite>();
     //*************************************************************************
 
@@ -32,41 +30,39 @@ public class OW_PlayerAnimator : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        moveDirection = OW_Globals.GetDirection(
-            GetComponent<OW_PlayerMechanics>().moveDirection);
+        facingDirection = GetComponent<OW_PlayerMechanics>().facingDirection;
 
         AnimatePlayer();
-
-        lastMoveDirection = moveDirection;
     }
 
     /*
-     * Animate Steps ( ) 
+     * Animate Player ( ) 
      * 
      */
     void AnimatePlayer()
-    {
-
-        if (moveDirection == MovementDirections.Left)
+    { 
+        if (facingDirection == MovementDirections.Left)
         {
             directionSprites = sprites.GetRange(8, 4);
         }
-        else if(moveDirection == MovementDirections.Right)
+        else if(facingDirection == MovementDirections.Right)
         {
             directionSprites = sprites.GetRange(12, 4);
         }
-        else if (moveDirection == MovementDirections.Down)
+        else if (facingDirection == MovementDirections.Down)
         {
             directionSprites = sprites.GetRange(0, 4);
         }
-        else if (moveDirection == MovementDirections.Up)
+        else if (facingDirection == MovementDirections.Up)
         {
             directionSprites = sprites.GetRange(4, 4);
         }
-        else  
+
+        if (GetComponent<OW_PlayerMechanics>().isMoving == false)
         {
-            // Static, use non-moving of previous move direction
-            GetComponent<SpriteRenderer>().sprite = directionSprites[0];
+            GetComponent<SpriteRenderer>().sprite =
+                directionSprites[0];
+            spriteIndex = 0;
             return;
         }
 

@@ -7,21 +7,24 @@ public class OW_PlayerMechanics : MonoBehaviour
 {
     /* PUBLIC VARS */
     //*************************************************************************
-    public Vector3 moveDirection;
+    public MovementDirections facingDirection;
+    public Vector3 inputDirection = Vector3.zero;
+    public Vector3 movingDirection = Vector3.zero;
+    public Vector3 initalPosition;
+    public Vector3 target;
+    public bool isMoving =false;
+    public float playerSpeed;
+    public float playerSprintSpeed = 16f;
+    public float playerWalkSpeed = 12f;
     public bool isSprinting = false;
     public bool isSpotted = false;
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
-    private float playerSpeed;
-    private bool isMoving;
-    public Vector3 target1;
-    public Vector3 target2;
-    public float playerSprintSpeed = 16f;
-    public float playerWalkSpeed = 12f;
     private OW_CameraManager cameraManager;
-    private List<RaycastHit2D> m_Contacts = new List<RaycastHit2D>();
+    private float stepLength = 0.8f;
+    private float startTime;
     //*************************************************************************
 
     void Awake()
@@ -34,10 +37,9 @@ public class OW_PlayerMechanics : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        isMoving = false;
-        moveDirection = Vector3.zero;
-        target1 = transform.position;
-        target2 = transform.position;
+        initalPosition = transform.position;
+        target = transform.position;
+        startTime = Time.time;
         cameraManager = Camera.main.GetComponent<OW_CameraManager>();
     }
 
@@ -52,16 +54,29 @@ public class OW_PlayerMechanics : MonoBehaviour
     }
 
     /* PlayerMovement ()
-     * This method updates gameobject's transform via rigid body motion 
-     * Translates the gameobject based on WASD keys
      * 
-     * Tests to see if the kinematic rigid body is 0.1 units from impacting
-     * another rigid body. If so, halt movement as if struck a wall
+     * This method updates gameobject's transform via rigid body motion 
+     * Translates the gameobject based on WASD keys input
+     * 
+     * Set player speed via checking if shift key is pressed
+     * 
+     * First time input is seen, check if player object is already facing that 
+     * direction. If so, begin moving in that direction. Otherwise, first pass 
+     * will rotate the player to that direction only. Establish target location
+     * 
+     * Once movement begins, move through to target. Once we reach target, 
+     * establish new target
+     * 
+     * Once input is lost, finish move to target, then stop moving.
+     * 
+     * If new input is made while moving, finish move through original target, 
+     * then establish new target.
+     * 
      */
     void PlayerMovement()
     {
-        // Set Player Speed
-        if(Input.GetButton("Run"))
+        // Set player speed
+        if (Input.GetButton("Run"))
         {
             playerSpeed = playerSprintSpeed;
             isSprinting = true;
@@ -72,18 +87,14 @@ public class OW_PlayerMechanics : MonoBehaviour
             isSprinting = false;
         }
 
-        // Get User Input
-        Vector3 inputDirection = new Vector3();
-
-        // If horizontal pressed, move horizontal
+        // Get user input direction
+        inputDirection = Vector3.zero;
         if (Input.GetButton("Horizontal"))
         {
             inputDirection.x = Input.GetAxis("Horizontal");
             inputDirection.y = 0;
             inputDirection.Normalize();
         }
-
-        // If vertical pressed, move vertical
         if (Input.GetButton("Vertical"))
         {
             inputDirection.x = 0;
@@ -93,60 +104,61 @@ public class OW_PlayerMechanics : MonoBehaviour
 
         if (inputDirection != Vector3.zero)
         {
-            if (!isMoving)
+            // Intend to move
+            float elapsedTime = (Time.time - startTime);
+            if (inputDirection ==
+                OW_Globals.GetVector3FromDirection(facingDirection) &&
+                elapsedTime > 0.22f)
             {
-                // First pass of movement
-                moveDirection = inputDirection;
+                // We are facing our move direction, proceed to move
+                target = inputDirection * stepLength + initalPosition;
                 isMoving = true;
-                return;
             }
-            
-            // No contact was found so move freely
-            target2 = moveDirection * 0.8f + target1;
+            else if(inputDirection !=
+                OW_Globals.GetVector3FromDirection(facingDirection))
+            {
+                // We are not facing move direction.
+                //
+                // Either need to finish our current move or 
+                // Spend one pass turning before moving
 
-            var test1 = Math.Abs(Math.IEEERemainder((double)target2.x, 0.8d)) <= 1e-2;
-            var test2 = Math.Abs(Math.IEEERemainder((double)target2.y, 0.8d)) <= 1e-2;
+                if (!isMoving)
+                {
+                    startTime = Time.time;
+                    facingDirection = OW_Globals.GetDirection(inputDirection);
+                    return;
+                }
+            }
+        }
+
+        if(isMoving)
+        {
+            var test1 = Math.Abs(Math.IEEERemainder((double)target.x,
+                (double)stepLength)) <= 1e-2;
+            var test2 = Math.Abs(Math.IEEERemainder((double)target.y,
+                (double)stepLength)) <= 1e-2;
             if (test1 && test2)
             {
                 GetComponent<Rigidbody2D>().MovePosition(
-                    Vector3.Lerp(transform.position, target2,
+                    Vector3.Lerp(transform.position, target,
                     playerSpeed * Time.fixedDeltaTime));
             }
-            
         }
 
-        if (inputDirection == Vector3.zero || inputDirection != moveDirection)
+        if (Vector3.Distance(transform.position, target) <= 1e-3)
         {
-            // Not actively moving
+            initalPosition = target;
 
-            if (Vector3.Distance(transform.position, target2) >= 1e-3)
+            if(inputDirection == Vector3.zero)
             {
-                // Move through to previously set target
-                var test3 = Math.Abs(Math.IEEERemainder((double)target2.x, 0.8d)) <= 1e-3;
-                var test4 = Math.Abs(Math.IEEERemainder((double)target2.y, 0.8d)) <= 1e-3;
-                if (test3 && test4)
-                {
-                    GetComponent<Rigidbody2D>().MovePosition(
-                        Vector3.Lerp(transform.position, target2,
-                        playerSpeed * Time.fixedDeltaTime));
-                }
-            }
-            else
-            {
-                // snap to target and be done moving
-                GetComponent<Rigidbody2D>().MovePosition(target2);
-                transform.position = target2;
-                target1 = target2;
                 isMoving = false;
-                moveDirection = Vector3.zero;
             }
-        }
 
-        if (Vector3.Distance(transform.position, target2) <= 1e-3)
-        {
-            target1 = target2;
+            if (inputDirection != Vector3.zero && inputDirection !=
+                OW_Globals.GetVector3FromDirection(facingDirection))
+            {
+                facingDirection = OW_Globals.GetDirection(inputDirection);
+            }
         }
     }
 }
-
-

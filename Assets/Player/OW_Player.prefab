@@ -100,13 +100,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd23be639f71e40ca980ec6ef2f92e8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDirection: {x: 0, y: 0, z: 0}
-  isSprinting: 0
-  isSpotted: 0
-  target1: {x: 0, y: 0, z: 0}
-  target2: {x: 0, y: 0, z: 0}
+  facingDirection: 2
+  inputDirection: {x: 0, y: 0, z: 0}
+  movingDirection: {x: 0, y: 0, z: 0}
+  initalPosition: {x: 0, y: 0, z: 0}
+  target: {x: 0, y: 0, z: 0}
+  isMoving: 0
+  playerSpeed: 0
   playerSprintSpeed: 16
   playerWalkSpeed: 12
+  isSprinting: 0
+  isSpotted: 0
 --- !u!114 &5448510050373472474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,8 +123,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b0f3766d7c744d6fba685373e267d87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprites: []
-  walkTime: 0.4
+  sprites:
+  - {fileID: 295001541, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -2090892809, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -1499805964, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -1269174824, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -692410214, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: 1227948029, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: 64655985, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -1163450803, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: 495431156, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: 1021851267, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -1439969684, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -155075801, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -1972159646, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -259104685, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: -1197127836, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  - {fileID: 187429762, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
+  walkTime: 0.6
 --- !u!61 &3550079752822335882
 BoxCollider2D:
   m_ObjectHideFlags: 0
