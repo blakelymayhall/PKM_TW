@@ -4,71 +4,85 @@ using UnityEngine;
 
 public class OW_PlayerAnimator : MonoBehaviour
 {
+    /* PUBLIC VARS */
+    //*************************************************************************
+    public List<Sprite> sprites = new List<Sprite>();
+    //*************************************************************************
+
     /* PRIVATE VARS */
     //*************************************************************************
-    private List<Color> spriteColors = new List<Color>()
-    {
-        Color.green,
-        Color.red,
-    };
-    private int colorIndex = 0;
+    private int spriteIndex = 0;
     private float startTime;
-    private const float walkTime = 0.6f;
-    private const float runTime = 0.3f;
-    private MovementDirections moveDirection =
-        MovementDirections.Static;
+    public float walkTime = 0.4f;
+    private float runTime = 0.23f;
+    private MovementDirections facingDirection =
+        MovementDirections.NaN;
+    private List<Sprite> directionSprites = new List<Sprite>();
     //*************************************************************************
 
     // Start is called before the first frame update
     void Start()
     {
         startTime = Time.time;
+        directionSprites = sprites.GetRange(0, 3);
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        moveDirection = OW_Globals.GetDirection(
-            GetComponent<OW_PlayerMechanics>().moveDirection);
+        facingDirection = GetComponent<OW_PlayerMechanics>().facingDirection;
 
         AnimatePlayer();
     }
 
     /*
-     * Animate Steps ( ) 
+     * Animate Player ( ) 
      * 
-     * This method checks the moveDirection for Static or moving
-     * 
-     * If the gameObject is moving, the method will alternate the color of the 
-     * sprite every one second while moving. 
-     * 
-     * Otherwise, the color of the sprite is black. 
-     * 
-     * This simulates using sprites for walking and being stationary.
      */
     void AnimatePlayer()
-    {
-        if (moveDirection != MovementDirections.Static)
+    { 
+        if (facingDirection == MovementDirections.Left)
         {
-            // Actively moving
-            float elapsedTime = Time.time - startTime;
-            if (elapsedTime >=
-                (GetComponent<OW_PlayerMechanics>().isSprinting ?
-                runTime : walkTime))
-            {
-                // Reset start time
-                startTime = Time.time;
-
-                // Flip colorIndex
-                colorIndex = (colorIndex == 0) ? 1 : 0;
-            }
-
-            GetComponent<SpriteRenderer>().color = spriteColors[colorIndex];
+            directionSprites = sprites.GetRange(8, 4);
         }
-        else
+        else if(facingDirection == MovementDirections.Right)
         {
-            // Not walking
-            GetComponent<SpriteRenderer>().color = Color.black;
+            directionSprites = sprites.GetRange(12, 4);
+        }
+        else if (facingDirection == MovementDirections.Down)
+        {
+            directionSprites = sprites.GetRange(0, 4);
+        }
+        else if (facingDirection == MovementDirections.Up)
+        {
+            directionSprites = sprites.GetRange(4, 4);
+        }
+
+        if (GetComponent<OW_PlayerMechanics>().isMoving == false)
+        {
+            GetComponent<SpriteRenderer>().sprite =
+                directionSprites[0];
+            spriteIndex = 0;
+            return;
+        }
+
+        // Actively moving
+        float elapsedTime = Time.time - startTime;
+        if (elapsedTime >=
+            (GetComponent<OW_PlayerMechanics>().isSprinting ?
+            runTime : walkTime))
+        {
+            // Reset start time
+            startTime = Time.time;
+
+            // Flip colorIndex
+            spriteIndex++;
+            if(spriteIndex >= 4)
+            {
+                spriteIndex = 0;
+            }
+            GetComponent<SpriteRenderer>().sprite =
+                directionSprites[spriteIndex]; 
         }
     }
 }

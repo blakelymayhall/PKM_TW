@@ -8,7 +8,7 @@ public enum MovementDirections
     Right,
     Down,
     Left,
-    Static
+    NaN
 }
 
 public class OW_Globals : MonoBehaviour
@@ -16,7 +16,7 @@ public class OW_Globals : MonoBehaviour
 
     /* MovementDirections (Vector3) 
      * 
-     * This method accepts a direction the sprite is moving and returns
+     * This method accepts a direction vector and returns
      * the cardinal direction type
      * 
      */
@@ -40,8 +40,37 @@ public class OW_Globals : MonoBehaviour
         }
         else
         {
-            return MovementDirections.Static;
+            return MovementDirections.NaN;
         }
+    }
+
+    /* MovementDirections (Vector3) 
+     * 
+     * This method accepts a direction vector and returns
+     * the cardinal direction type
+     * 
+    */
+    public static Vector3 GetVector3FromDirection(
+        MovementDirections direction)
+    {
+        if (direction == MovementDirections.Up)
+        {
+            return Vector3.up;
+        }
+        else if (direction == MovementDirections.Down)
+        {
+            return Vector3.down;
+        }
+        else if (direction == MovementDirections.Left)
+        {
+            return Vector3.left;
+        }
+        else if (direction == MovementDirections.Right)
+        {
+            return Vector3.right;
+        }
+
+        return Vector3.zero;
     }
 
     /*
