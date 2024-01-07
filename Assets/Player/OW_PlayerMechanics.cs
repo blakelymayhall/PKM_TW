@@ -2,28 +2,29 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class OW_PlayerMechanics : MonoBehaviour
 {
+
     /* PUBLIC VARS */
     //*************************************************************************
     public MovementDirections facingDirection;
-    public Vector3 inputDirection = Vector3.zero;
-    public Vector3 movingDirection = Vector3.zero;
-    public Vector3 initalPosition;
-    public Vector3 target;
-    public bool isMoving =false;
+    public Tilemap tilemap;
+    public Vector2 targetLocation = Vector3.zero;
+    public bool isMoving = false;
     public float playerSpeed;
-    public float playerSprintSpeed = 16f;
-    public float playerWalkSpeed = 12f;
     public bool isSprinting = false;
     public bool isSpotted = false;
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
+    private Vector3 inputDirection = Vector3.zero;
+    private float playerSprintSpeed = 8f;
+    private float playerWalkSpeed = 4f;
+    private Vector2 tileSize = new Vector2(1f, 1f);
     private OW_CameraManager cameraManager;
-    private float stepLength = 0.8f;
     private float startTime;
     //*************************************************************************
 
@@ -34,131 +35,108 @@ public class OW_PlayerMechanics : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        initalPosition = transform.position;
-        target = transform.position;
-        startTime = Time.time;
         cameraManager = Camera.main.GetComponent<OW_CameraManager>();
+        cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
+        startTime = Time.time;
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-
-        PlayerMovement();
-
-        // Force camera to player
-        cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
+        SetSprint();
+        Vector3 newInputDirection = GetUserInput();
+        UpdateFacingDirection(newInputDirection);
+        StartMoveFromStationary();
+        MovePlayer();
     }
 
-    /* PlayerMovement ()
-     * 
-     * This method updates gameobject's transform via rigid body motion 
-     * Translates the gameobject based on WASD keys input
-     * 
-     * Set player speed via checking if shift key is pressed
-     * 
-     * First time input is seen, check if player object is already facing that 
-     * direction. If so, begin moving in that direction. Otherwise, first pass 
-     * will rotate the player to that direction only. Establish target location
-     * 
-     * Once movement begins, move through to target. Once we reach target, 
-     * establish new target
-     * 
-     * Once input is lost, finish move to target, then stop moving.
-     * 
-     * If new input is made while moving, finish move through original target, 
-     * then establish new target.
-     * 
-     */
-    void PlayerMovement()
+    void SetSprint() 
     {
-        // Set player speed
-        if (Input.GetButton("Run"))
-        {
-            playerSpeed = playerSprintSpeed;
-            isSprinting = true;
-        }
-        else
-        {
-            playerSpeed = playerWalkSpeed;
-            isSprinting = false;
-        }
+        // If shift is held, sprint
+        isSprinting = Input.GetButton("Run");
+        playerSpeed = isSprinting ? playerSprintSpeed : playerWalkSpeed;
+    }
 
-        // Get user input direction
-        inputDirection = Vector3.zero;
+    Vector3 GetUserInput()
+    {
+        // Get user input
+        Vector3 inputDirection = Vector3.zero;
         if (Input.GetButton("Horizontal"))
         {
             inputDirection.x = Input.GetAxis("Horizontal");
-            inputDirection.y = 0;
-            inputDirection.Normalize();
         }
-        if (Input.GetButton("Vertical"))
+        else if (Input.GetButton("Vertical"))
         {
-            inputDirection.x = 0;
             inputDirection.y = Input.GetAxis("Vertical");
-            inputDirection.Normalize();
         }
+        inputDirection.Normalize();
+        return inputDirection;
+    }
 
-        if (inputDirection != Vector3.zero)
+    void UpdateFacingDirection(Vector3 newInputDirection)
+    {
+        if (inputDirection != newInputDirection) 
         {
-            // Intend to move
-            float elapsedTime = (Time.time - startTime);
-            if (inputDirection ==
-                OW_Globals.GetVector3FromDirection(facingDirection) &&
-                elapsedTime > 0.22f)
+            if (!isMoving)
             {
-                // We are facing our move direction, proceed to move
-                target = inputDirection * stepLength + initalPosition;
+                // Start stationary timer to allow for single-tap direction change
+                startTime = Time.time;
+            }
+            facingDirection = OW_Globals.GetDirection(newInputDirection);
+            inputDirection = newInputDirection;
+        }
+    }
+
+    void StartMoveFromStationary()
+    {
+        if (inputDirection != Vector3.zero && !isMoving)
+        {
+            // Start move after delay to allow for single-tap direction change
+            float timeStationary = Time.time - startTime;
+            if (timeStationary > 0.11f)
+            {
+                targetLocation = GetTargetTile();
                 isMoving = true;
             }
-            else if(inputDirection !=
-                OW_Globals.GetVector3FromDirection(facingDirection))
-            {
-                // We are not facing move direction.
-                //
-                // Either need to finish our current move or 
-                // Spend one pass turning before moving
-
-                if (!isMoving)
-                {
-                    startTime = Time.time;
-                    facingDirection = OW_Globals.GetDirection(inputDirection);
-                    return;
-                }
-            }
         }
+    }
 
-        if(isMoving)
+    void MovePlayer()
+    {
+        if (isMoving)
         {
-            var test1 = Math.Abs(Math.IEEERemainder((double)target.x,
-                (double)stepLength)) <= 1e-2;
-            var test2 = Math.Abs(Math.IEEERemainder((double)target.y,
-                (double)stepLength)) <= 1e-2;
-            if (test1 && test2)
-            {
-                GetComponent<Rigidbody2D>().MovePosition(
-                    Vector3.Lerp(transform.position, target,
-                    playerSpeed * Time.fixedDeltaTime));
-            }
+            Vector2 newPosition = Vector3.MoveTowards(transform.position,
+                targetLocation,
+                Time.fixedDeltaTime * playerSpeed);
+            GetComponent<Rigidbody2D>().MovePosition(newPosition);
+            ResetIfTargetReached();
         }
+    }
 
-        if (Vector3.Distance(transform.position, target) <= 1e-3)
+    Vector3 GetTargetTile()
+    {
+        Vector3 nextTilePosition = transform.position +
+            new Vector3(inputDirection.x * tileSize.x, inputDirection.y * tileSize.y, 0f);
+        Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
+        return tilemap.GetCellCenterWorld(nextTileCellPosition);
+    }
+
+    void ResetIfTargetReached() 
+    {
+        if (Vector2.Distance(transform.position, targetLocation) < 1e-3)
         {
-            initalPosition = target;
-
-            if(inputDirection == Vector3.zero)
+            GetComponent<Rigidbody2D>().MovePosition(targetLocation);
+            if (inputDirection != Vector3.zero)
+            {
+                targetLocation = GetTargetTile();
+                cameraManager.playerPos = transform.position;
+            }
+            else
             {
                 isMoving = false;
-            }
-
-            if (inputDirection != Vector3.zero && inputDirection !=
-                OW_Globals.GetVector3FromDirection(facingDirection))
-            {
-                facingDirection = OW_Globals.GetDirection(inputDirection);
             }
         }
     }
 }
+

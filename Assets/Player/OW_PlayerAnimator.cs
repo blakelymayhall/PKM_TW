@@ -13,8 +13,8 @@ public class OW_PlayerAnimator : MonoBehaviour
     //*************************************************************************
     private int spriteIndex = 0;
     private float startTime;
-    public float walkTime = 0.4f;
-    private float runTime = 0.23f;
+    public float walkTime = 0.23f;
+    private float runTime = 0.1f;
     private MovementDirections facingDirection =
         MovementDirections.NaN;
     private List<Sprite> directionSprites = new List<Sprite>();
@@ -35,10 +35,6 @@ public class OW_PlayerAnimator : MonoBehaviour
         AnimatePlayer();
     }
 
-    /*
-     * Animate Player ( ) 
-     * 
-     */
     void AnimatePlayer()
     { 
         if (facingDirection == MovementDirections.Left)
