@@ -42,13 +42,18 @@ public class OW_PlayerMechanics : MonoBehaviour
         startTime = Time.time;
     }
 
-    void FixedUpdate()
+    void Update()
     {
         SetSprint();
         Vector3 newInputDirection = GetUserInput();
         UpdateFacingDirection(newInputDirection);
         StartMoveFromStationary();
-        MovePlayer();
+        cameraManager.playerPos = transform.position;
+    }
+
+    void FixedUpdate()
+    {
+        MovePlayer();       
     }
 
     void SetSprint() 
@@ -130,7 +135,6 @@ public class OW_PlayerMechanics : MonoBehaviour
             if (inputDirection != Vector3.zero)
             {
                 targetLocation = GetTargetTile();
-                cameraManager.playerPos = transform.position;
             }
             else
             {

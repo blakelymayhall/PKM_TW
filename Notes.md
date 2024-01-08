@@ -9,4 +9,9 @@
 	- Colored tiles to represent things?
 - Implemented this and fiddled with grid movement to see if I could get something close to Pokemon style movement
 - Found something I like - going to upload to github and link here:
-- 
+ 
+
+# 01-06-24
+- Enabling VSync helped a lot 
+- Going to review the 2D rogue like tutorial and see what I can learn from that movement style
+- Ultimate goal is to eliminate the ice skating movement and maybe introduce additional 'snappiness' to the movement.
