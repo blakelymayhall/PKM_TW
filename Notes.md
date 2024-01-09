@@ -15,3 +15,8 @@
 - Enabling VSync helped a lot 
 - Going to review the 2D rogue like tutorial and see what I can learn from that movement style
 - Ultimate goal is to eliminate the ice skating movement and maybe introduce additional 'snappiness' to the movement.
+
+# 01-07-24
+- Implement things learned from the rouge like tutorial - major overhaul of the movement but it is much better
+- Need to reimplement the single-tap turns 
+- Need to hone-in on speed I think
