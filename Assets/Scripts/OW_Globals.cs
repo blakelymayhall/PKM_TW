@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum MovementDirections
+public enum MovementDirection
 {
     Up,
     Right,
@@ -20,27 +20,27 @@ public class OW_Globals : MonoBehaviour
      * the cardinal direction type
      * 
      */
-    public static MovementDirections GetDirection(Vector3 direction)
+    public static MovementDirection GetDirection(Vector3 direction)
     {
         if (direction.x < 0)
         {
-            return MovementDirections.Left;
+            return MovementDirection.Left;
         }
         else if (direction.x > 0)
         {
-            return MovementDirections.Right;
+            return MovementDirection.Right;
         }
         else if (direction.y > 0)
         {
-            return MovementDirections.Up;
+            return MovementDirection.Up;
         }
         else if (direction.y < 0)
         {
-            return MovementDirections.Down;
+            return MovementDirection.Down;
         }
         else
         {
-            return MovementDirections.NaN;
+            return MovementDirection.NaN;
         }
     }
 
@@ -51,21 +51,21 @@ public class OW_Globals : MonoBehaviour
      * 
     */
     public static Vector3 GetVector3FromDirection(
-        MovementDirections direction)
+        MovementDirection direction)
     {
-        if (direction == MovementDirections.Up)
+        if (direction == MovementDirection.Up)
         {
             return Vector3.up;
         }
-        else if (direction == MovementDirections.Down)
+        else if (direction == MovementDirection.Down)
         {
             return Vector3.down;
         }
-        else if (direction == MovementDirections.Left)
+        else if (direction == MovementDirection.Left)
         {
             return Vector3.left;
         }
-        else if (direction == MovementDirections.Right)
+        else if (direction == MovementDirection.Right)
         {
             return Vector3.right;
         }
@@ -89,28 +89,28 @@ public class OW_Globals : MonoBehaviour
      * 
      */
     public static void RotateSprite(GameObject gameObject,
-        MovementDirections moveDirection)
+        MovementDirection moveDirection)
     {
         Vector2 currentDirection = gameObject.transform.up;
         Vector2 targetDirection = currentDirection;
         switch (moveDirection)
         {
-            case MovementDirections.Left:
+            case MovementDirection.Left:
             {
                 targetDirection = Vector2.left;
                 break;
             }
-            case MovementDirections.Right:
+            case MovementDirection.Right:
             {
                 targetDirection = Vector2.right;
                 break;
             }
-            case MovementDirections.Up:
+            case MovementDirection.Up:
             {
                 targetDirection = Vector2.up;
                 break;
             }
-            case MovementDirections.Down:
+            case MovementDirection.Down:
             {
                 targetDirection = Vector2.down;
                 break;

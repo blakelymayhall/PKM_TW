@@ -20,3 +20,8 @@
 - Implement things learned from the rouge like tutorial - major overhaul of the movement but it is much better
 - Need to reimplement the single-tap turns 
 - Need to hone-in on speed I think
+
+# 01-08-24
+- implemented the delay so he can turn without moving
+- Re orgged the animator script
+- one final thing to kill - need to make it so the guy doesnt move before his body physically is facing the right way

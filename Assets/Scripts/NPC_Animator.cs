@@ -14,8 +14,8 @@ public class NPC_Animator : MonoBehaviour
     private int colorIndex = 0;
     private float startTime;
     private const float walkTime = 0.6f;
-    private MovementDirections moveDirection =
-        MovementDirections.NaN;
+    private MovementDirection moveDirection =
+        MovementDirection.NaN;
     //*************************************************************************
 
     // Start is called before the first frame update
@@ -47,7 +47,7 @@ public class NPC_Animator : MonoBehaviour
         moveDirection = OW_Globals.GetDirection(
             GetComponent<NPC_Mechanics>().moveDirection);
 
-        if (moveDirection != MovementDirections.NaN)
+        if (moveDirection != MovementDirection.NaN)
         {
             // Actively moving
             float elapsedTime = Time.time - startTime;

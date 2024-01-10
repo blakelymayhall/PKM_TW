@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -5,15 +7,17 @@ public class OW_PlayerMechanics : OW_MovingObject
 {
     /* PUBLIC VARS */
     //*************************************************************************
-    public MovementDirections facingDirection;
+    public MovementDirection facingDirection;
     public Tilemap tilemap;
     public bool isSpotted = false;
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
-    private Vector3 inputDirection = Vector3.zero;
     private OW_CameraManager cameraManager;
+
+    private Vector3 inputDirection = Vector3.zero;
+    private bool startMove = false;
     //*************************************************************************
 
     void Awake()
@@ -25,6 +29,7 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     protected override void Start()
     {
+        base.Start();
         cameraManager = Camera.main.GetComponent<OW_CameraManager>();
         cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
     }
@@ -34,11 +39,20 @@ public class OW_PlayerMechanics : OW_MovingObject
         SetSprint();
         
         GetUserInput();
-        if (!isMoving && inputDirection != Vector3.zero)
+        noInput = inputDirection == Vector3.zero;
+
+        if (!noInput) 
         {
             facingDirection = OW_Globals.GetDirection(inputDirection);
-            Move(GetTargetTile(inputDirection, tilemap));
-        }   
+            if (!isMoving)
+            {
+                StartCoroutine(CheckHeld());
+                if (startMove)
+                { 
+                    Move(GetTargetTile(inputDirection, tilemap));
+                }
+            }   
+        }
         
         cameraManager.playerPos = transform.position;
     }
@@ -59,5 +73,22 @@ public class OW_PlayerMechanics : OW_MovingObject
         }
         inputDirection.Normalize();
     }    
+
+    // Require the input key be held before moving 
+    // This allows user to turn directions without moving
+    IEnumerator CheckHeld()
+    {
+        float startTime = Time.time;
+        while (Time.time-startTime < 0.15f)
+        {
+            if (noInput) 
+            {
+                startMove = false;
+                yield break;
+            }
+            yield return null;
+        }
+        startMove = true;
+    }
 }
 

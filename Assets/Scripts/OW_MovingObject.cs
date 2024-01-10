@@ -7,30 +7,34 @@ public abstract class OW_MovingObject : MonoBehaviour
 
     /* PUBLIC VARS */
     //*************************************************************************
-    public float moveTime = 0.22f; // Seconds it will take object to move
+    public float moveTime = 0.23f; // Seconds it will take object to move
+    public bool noInput = true;
     public bool isMoving = false;
     public bool isSprinting = false; 
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
-    
+    private new Rigidbody2D rigidbody2D;
+
     private Vector2 tileSize = new Vector2(1f, 1f);
-    private readonly float sprintMoveTime = 0.23f; // Seconds it will take object to move
-    private readonly float walkMoveTime = 0.33f; // Seconds it will take object to move
+    private readonly float sprintMoveTime = 0.23f; 
+    private readonly float walkMoveTime = 0.33f;
     //*************************************************************************
 
     protected virtual void Start()
     {
-
+        rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
     // Returns world coordinates of the next tile in the given 
     // normalized direction
     protected Vector3 GetTargetTile(Vector3 inputDirection, Tilemap tilemap)
     {
-        Vector3 nextTilePosition = transform.position +
-            new Vector3(inputDirection.x * tileSize.x, inputDirection.y * tileSize.y, 0f);
+        Vector3 nextTilePosition = transform.position + new Vector3(
+            inputDirection.x * tileSize.x, 
+            inputDirection.y * tileSize.y, 
+            0f);
         Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
         return tilemap.GetCellCenterWorld(nextTileCellPosition);
     }
@@ -57,18 +61,19 @@ public abstract class OW_MovingObject : MonoBehaviour
         float sqrRemainingDistance = (transform.position - target).sqrMagnitude;
         while (sqrRemainingDistance > float.Epsilon)
         {
-            float inverseMoveTime = 1f / (isSprinting ? sprintMoveTime : walkMoveTime);
+            float inverseMoveTime = 1f / 
+                (isSprinting ? sprintMoveTime : walkMoveTime);
             Vector3 newPostion = Vector3.MoveTowards(
-                GetComponent<Rigidbody2D>().position,
+                rigidbody2D.position,
                 target,
                 inverseMoveTime * Time.deltaTime);
-            GetComponent<Rigidbody2D>().MovePosition(newPostion);
+            rigidbody2D.MovePosition(newPostion);
 
             sqrRemainingDistance = (transform.position - target).sqrMagnitude;
             yield return null;
         }
 
-        GetComponent<Rigidbody2D>().MovePosition(target);
+        rigidbody2D.MovePosition(target);
         isMoving = false;
     }
 

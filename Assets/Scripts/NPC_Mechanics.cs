@@ -14,8 +14,8 @@ public class NPC_Mechanics : MonoBehaviour
 
     // Spin Mechanics
     public bool isSpin = false;
-    public List<MovementDirections> spinDirections =
-        new List<MovementDirections>();
+    public List<MovementDirection> spinDirections =
+        new List<MovementDirection>();
 
     // Player Spotting Mechanics
     public float spotDistance = 3f;
