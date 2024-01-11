@@ -25,3 +25,7 @@
 - implemented the delay so he can turn without moving
 - Re orgged the animator script
 - one final thing to kill - need to make it so the guy doesnt move before his body physically is facing the right way
+
+# 01-10-24
+- Intend to migrate to Jira/Rally tonight
+- Finally got the movement where I want it 

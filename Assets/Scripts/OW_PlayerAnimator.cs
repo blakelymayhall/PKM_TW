@@ -15,8 +15,8 @@ public class OW_PlayerAnimator : MonoBehaviour
     private SpriteRenderer spriteRenderer;
 
     private int spriteIndex = 0;
-    private readonly float walkTime = 0.2f;
-    private readonly float runTime = 0.1f;
+    private readonly float walkTime = 0.16f;
+    private readonly float runTime = 0.12f;
     private List<Sprite> directionSprites = new();
     private float timer = 0f;
     //*************************************************************************
@@ -26,14 +26,15 @@ public class OW_PlayerAnimator : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerMechanics = GetComponent<OW_PlayerMechanics>();
+
+        UpdateDirectionSprites();
     }
 
     // Update is called once per frame
     void Update()
     {
+        //Debug.Log($"Player Moving: {playerMechanics.isMoving}");
         timer += Time.deltaTime;
-
-        UpdateDirectionSprites();
         
         if (playerMechanics.noInput && !playerMechanics.isMoving)
         {
@@ -51,7 +52,7 @@ public class OW_PlayerAnimator : MonoBehaviour
         }
     }
 
-    void UpdateDirectionSprites()
+    public void UpdateDirectionSprites()
     {
         // Get sprites for direciton we are moving
         directionSprites = playerMechanics.facingDirection switch
@@ -61,5 +62,6 @@ public class OW_PlayerAnimator : MonoBehaviour
             MovementDirection.Down => sprites.GetRange(0, 4),
             _ => sprites.GetRange(4, 4),
         };
+        spriteRenderer.sprite = directionSprites[0];
     }
 }

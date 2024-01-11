@@ -15,6 +15,7 @@ public class OW_PlayerMechanics : OW_MovingObject
     /* PRIVATE VARS */
     //*************************************************************************
     private OW_CameraManager cameraManager;
+    private OW_PlayerAnimator playerAnimator;
 
     private Vector3 inputDirection = Vector3.zero;
     private bool startMove = false;
@@ -30,6 +31,7 @@ public class OW_PlayerMechanics : OW_MovingObject
     protected override void Start()
     {
         base.Start();
+        playerAnimator = GetComponent<OW_PlayerAnimator>();
         cameraManager = Camera.main.GetComponent<OW_CameraManager>();
         cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
     }
@@ -43,9 +45,15 @@ public class OW_PlayerMechanics : OW_MovingObject
 
         if (!noInput) 
         {
-            facingDirection = OW_Globals.GetDirection(inputDirection);
             if (!isMoving)
             {
+                if (OW_Globals.GetVector3FromDirection(facingDirection) != inputDirection)
+                {
+                    facingDirection = OW_Globals.GetDirection(inputDirection);
+                    playerAnimator.UpdateDirectionSprites();
+                }
+                facingDirection = OW_Globals.GetDirection(inputDirection);
+                
                 StartCoroutine(CheckHeld());
                 if (startMove)
                 { 
