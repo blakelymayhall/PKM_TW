@@ -77,10 +77,8 @@ public abstract class OW_MovingObject : MonoBehaviour
         isMoving = false;
     }
 
-    // AttemptMove takes a generic parameter T to specify the type of component 
-    // we expect our unit to interact with if blocked (Player for Enemies, Wall for Player).
-    // protected virtual void AttemptMove<T>(int xDir, int yDir)
-    //     where T : Component
+    // Attempt move prevents 
+    // protected virtual void AttemptMove(int xDir, int yDir)
     // {
     //     //Hit will store whatever our linecast hits when Move is called.
     //     RaycastHit2D hit;

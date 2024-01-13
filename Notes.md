@@ -28,4 +28,5 @@
 
 # 01-10-24
 - Intend to migrate to Jira/Rally tonight
-- Finally got the movement where I want it 
+- Finally got the movement where I want it
+- Go into planning/brainstorming phase 
