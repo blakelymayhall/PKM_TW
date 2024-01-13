@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -53,7 +52,7 @@ public class OW_PlayerMechanics : OW_MovingObject
                     playerAnimator.UpdateDirectionSprites();
                 }
                 facingDirection = OW_Globals.GetDirection(inputDirection);
-                
+
                 StartCoroutine(CheckHeld());
                 if (startMove)
                 { 
