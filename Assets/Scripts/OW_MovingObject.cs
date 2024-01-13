@@ -10,7 +10,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     public float moveTime = 0.23f; // Seconds it will take object to move
     public bool noInput = true;
     public bool isMoving = false;
-    public bool isSprinting = false; 
+    public bool isSprinting = false;
     //*************************************************************************
 
     /* PRIVATE VARS */
@@ -18,7 +18,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     private new Rigidbody2D rigidbody2D;
 
     private Vector2 tileSize = new Vector2(1f, 1f);
-    private readonly float sprintMoveTime = 0.23f; 
+    private readonly float sprintMoveTime = 0.23f;
     private readonly float walkMoveTime = 0.33f;
     //*************************************************************************
 
@@ -32,8 +32,8 @@ public abstract class OW_MovingObject : MonoBehaviour
     protected Vector3 GetTargetTile(Vector3 inputDirection, Tilemap tilemap)
     {
         Vector3 nextTilePosition = transform.position + new Vector3(
-            inputDirection.x * tileSize.x, 
-            inputDirection.y * tileSize.y, 
+            inputDirection.x * tileSize.x,
+            inputDirection.y * tileSize.y,
             0f);
         Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
         return tilemap.GetCellCenterWorld(nextTileCellPosition);
@@ -43,7 +43,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     // Move takes parameters for x direction, y direction
     protected virtual bool Move(Vector3 target, bool delayMove = false)
     {
-        if (!isMoving)
+        if (!isMoving && CanMove(target))
         {
             StartCoroutine(SmoothMovement(target));
             return true;
@@ -53,7 +53,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     }
 
     // Co-routine for moving units from one space to next, takes a 
-    // parameter end to specify where to move to.
+    // parameter target to specify where to move to.
     protected IEnumerator SmoothMovement(Vector3 target)
     {
         isMoving = true;
@@ -61,7 +61,7 @@ public abstract class OW_MovingObject : MonoBehaviour
         float sqrRemainingDistance = (transform.position - target).sqrMagnitude;
         while (sqrRemainingDistance > float.Epsilon)
         {
-            float inverseMoveTime = 1f / 
+            float inverseMoveTime = 1f /
                 (isSprinting ? sprintMoveTime : walkMoveTime);
             Vector3 newPostion = Vector3.MoveTowards(
                 rigidbody2D.position,
@@ -77,31 +77,24 @@ public abstract class OW_MovingObject : MonoBehaviour
         isMoving = false;
     }
 
-    // Attempt move prevents 
-    // protected virtual void AttemptMove(int xDir, int yDir)
-    // {
-    //     //Hit will store whatever our linecast hits when Move is called.
-    //     RaycastHit2D hit;
+    // Method returns false if anything is occupying the tile being moved to
+    protected virtual bool CanMove(Vector3 target)
+    {
+        // Cast a ray in the direction of the move to confirm that 
+        // nothing rigid is in our path. Disable this objects collider.
+        GetComponent<BoxCollider2D>().enabled = false;
+        RaycastHit2D hit =
+            Physics2D.Linecast(transform.position, target);
+        GetComponent<BoxCollider2D>().enabled = true;
 
-    //     //Set canMove to true if Move was successful, false if failed.
-    //     bool canMove = Move(xDir, yDir, out hit);
+        if (hit.transform == null)
+        {
+            return true;
+        }
 
-    //     //Check if nothing was hit by linecast
-    //     if (hit.transform == null)
-    //         //If nothing was hit, return and don't execute further code.
-    //         return;
+        // GameObject hitComponent = hit.collider.gameObject;
+        // Debug.Log(hitComponent.name);
 
-    //     //Get a component reference to the component of type T attached to the object that was hit
-    //     T hitComponent = hit.transform.GetComponent<T>();
-
-    //     //If canMove is false and hitComponent is not equal to null, meaning MovingObject is blocked and has hit something it can interact with.
-    //     if (!canMove && hitComponent != null)
-
-    //         //Call the OnCantMove function and pass it hitComponent as a parameter.
-    //         OnCantMove(hitComponent);
-    // }
-
-    //OnCantMove will be overriden by functions in the inheriting classes.
-    // protected abstract void OnCantMove<T>(T component)
-    //     where T : Component;
+        return false;
+    }
 }
