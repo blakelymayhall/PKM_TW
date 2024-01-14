@@ -13,13 +13,17 @@ public abstract class OW_MovingObject : MonoBehaviour
     public bool isSprinting = false;
     //*************************************************************************
 
+    /* PROTECTED VARS */
+    //*************************************************************************
+    protected float sprintMoveTime = 0.23f;
+    protected float walkMoveTime = 0.33f;
+    //*************************************************************************
+
     /* PRIVATE VARS */
     //*************************************************************************
     private new Rigidbody2D rigidbody2D;
 
     private Vector2 tileSize = new Vector2(1f, 1f);
-    private readonly float sprintMoveTime = 0.23f;
-    private readonly float walkMoveTime = 0.33f;
     //*************************************************************************
 
     protected virtual void Start()
@@ -43,7 +47,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     // Move takes parameters for x direction, y direction
     protected virtual bool Move(Vector3 target, bool delayMove = false)
     {
-        if (!isMoving && CanMove(target))
+        if (CanMove(target))
         {
             StartCoroutine(SmoothMovement(target));
             return true;

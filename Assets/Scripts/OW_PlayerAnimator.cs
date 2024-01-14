@@ -27,7 +27,7 @@ public class OW_PlayerAnimator : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerMechanics = GetComponent<OW_PlayerMechanics>();
 
-        UpdateDirectionSprites();
+        UpdateDirectionSprites(OW_Globals.GetDirection(Vector3.zero));
     }
 
     // Update is called once per frame
@@ -52,10 +52,10 @@ public class OW_PlayerAnimator : MonoBehaviour
         }
     }
 
-    public void UpdateDirectionSprites()
+    public void UpdateDirectionSprites(MovementDirection facingDirection)
     {
         // Get sprites for direciton we are moving
-        directionSprites = playerMechanics.facingDirection switch
+        directionSprites = facingDirection switch
         {
             MovementDirection.Left => sprites.GetRange(8, 4),
             MovementDirection.Right => sprites.GetRange(12, 4),
