@@ -63,7 +63,7 @@ public class OW_PlayerMechanics : OW_MovingObject
     void GetUserInput()
     {
         isSprinting = Input.GetButton("Run"); // Shift Key
-
+    
         inputDirection = Vector3.zero;
         inputDirection.x = (int) Input.GetAxisRaw ("Horizontal");
         inputDirection.y = (int) Input.GetAxisRaw ("Vertical");
