@@ -6,7 +6,6 @@ public class OW_PlayerMechanics : OW_MovingObject
 {
     /* PUBLIC VARS */
     //*************************************************************************
-    public MovementDirection facingDirection;
     public Tilemap tilemap;
     public bool isSpotted = false;
     //*************************************************************************
@@ -18,6 +17,7 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     private Vector3 inputDirection = Vector3.zero;
     private bool startMove = false;
+    private MovementDirection facingDirection;
     //*************************************************************************
 
     void Awake()
@@ -37,40 +37,33 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     void Update()
     {
-        SetSprint();
-        
         GetUserInput();
-        noInput = inputDirection == Vector3.zero;
-
-        if (!noInput) 
+    
+        if (!noInput && !isMoving)
         {
-            if (!isMoving)
-            {
-                if (OW_Globals.GetVector3FromDirection(facingDirection) != inputDirection)
-                {
-                    facingDirection = OW_Globals.GetDirection(inputDirection);
-                    playerAnimator.UpdateDirectionSprites();
-                }
-                facingDirection = OW_Globals.GetDirection(inputDirection);
+            bool facingMoveDirection = 
+                OW_Globals.GetVector3FromDirection(facingDirection) == inputDirection;
+            facingDirection = OW_Globals.GetDirection(inputDirection);
 
-                StartCoroutine(CheckHeld());
-                if (startMove)
-                { 
-                    Move(GetTargetTile(inputDirection, tilemap));
-                }
-            }   
+            if(!facingMoveDirection)
+            {
+                playerAnimator.UpdateDirectionSprites(facingDirection);
+            }
+
+            StartCoroutine(CheckHeld());
+            if (startMove) 
+            {
+                Move(GetTargetTile(inputDirection, tilemap));
+            }
         }
         
         cameraManager.playerPos = transform.position;
     }
 
-    void SetSprint() 
-    {
-        isSprinting = Input.GetButton("Run"); // Shift Key
-    }
-
     void GetUserInput()
     {
+        isSprinting = Input.GetButton("Run"); // Shift Key
+
         inputDirection = Vector3.zero;
         inputDirection.x = (int) Input.GetAxisRaw ("Horizontal");
         inputDirection.y = (int) Input.GetAxisRaw ("Vertical");
@@ -79,6 +72,7 @@ public class OW_PlayerMechanics : OW_MovingObject
             inputDirection.y = 0;
         }
         inputDirection.Normalize();
+        noInput = inputDirection == Vector3.zero;
     }    
 
     // Require the input key be held before moving 
