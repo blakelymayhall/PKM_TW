@@ -11,22 +11,18 @@ public enum NPC_Type
     Recruit
 }
 
+public enum NPC_MoveStyle
+{
+    None,
+    Wander,
+    Spin
+}
+
 public class NPC_Identity : MonoBehaviour
 {
     /* PUBLIC VARS */
     //*************************************************************************
-    public List<NPC_Type> npc_types;
+    public List<NPC_Type> npc_type;
+    public NPC_MoveStyle npc_movestyle;
     //*************************************************************************
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

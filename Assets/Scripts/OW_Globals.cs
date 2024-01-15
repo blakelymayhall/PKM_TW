@@ -72,54 +72,5 @@ public class OW_Globals : MonoBehaviour
 
         return Vector3.zero;
     }
-
-    /*
-     * RotateSprite (GameObject gameObject, MovementDirections moveDirection)
-     * 
-     * This method checks the accepts a gameObject and a direction to rotate 
-     * the object to face
-     * 
-     * Whichever direction it is will be used to establish a target 
-     * vector in the appropriate direction. The gameObject's orientation will
-     * be rotated to the target orientaiton
-     * 
-     * For instance, if moving north the code will set the target to Vector2.up
-     * and find the delta angle between the current Euler angles and the up
-     * vector. The body is rotated through the delta
-     * 
-     */
-    public static void RotateSprite(GameObject gameObject,
-        MovementDirection moveDirection)
-    {
-        Vector2 currentDirection = gameObject.transform.up;
-        Vector2 targetDirection = currentDirection;
-        switch (moveDirection)
-        {
-            case MovementDirection.Left:
-            {
-                targetDirection = Vector2.left;
-                break;
-            }
-            case MovementDirection.Right:
-            {
-                targetDirection = Vector2.right;
-                break;
-            }
-            case MovementDirection.Up:
-            {
-                targetDirection = Vector2.up;
-                break;
-            }
-            case MovementDirection.Down:
-            {
-                targetDirection = Vector2.down;
-                break;
-            }
-        }
-
-        float angle =
-            Vector2.SignedAngle(currentDirection, targetDirection);
-        gameObject.transform.Rotate(0f, 0f, angle);
-    }
 }
 

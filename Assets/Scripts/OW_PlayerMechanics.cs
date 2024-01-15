@@ -60,7 +60,7 @@ public class OW_PlayerMechanics : OW_MovingObject
         cameraManager.playerPos = transform.position;
     }
 
-    void GetUserInput()
+    private void GetUserInput()
     {
         isSprinting = Input.GetButton("Run"); // Shift Key
     
@@ -77,7 +77,7 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     // Require the input key be held before moving 
     // This allows user to turn directions without moving
-    IEnumerator CheckHeld()
+    private IEnumerator CheckHeld()
     {
         float startTime = Time.time;
         while (Time.time-startTime < 0.15f)

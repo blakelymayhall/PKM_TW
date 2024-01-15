@@ -2,70 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPC_Animator : MonoBehaviour
+public class NPC_Animator : OW_Animator
 {
+    /* PUBLIC VARS */
+    //*************************************************************************
+    public List<Sprite> spinSprites = new();
+    //*************************************************************************
+
     /* PRIVATE VARS */
     //*************************************************************************
-    private List<Color> spriteColors = new List<Color>()
-    {
-        Color.green,
-        Color.red,
-    };
-    private int colorIndex = 0;
-    private float startTime;
-    private const float walkTime = 0.6f;
-    private MovementDirection moveDirection =
-        MovementDirection.NaN;
+    NPC_Mechanics npc_mechanics;
+
+    private readonly int downSpriteIdx = 2;
+    private readonly int leftSpriteIdx = 3;
+    private readonly int rightSpriteIdx = 1;
+    private readonly int upSpriteIdx = 0;
     //*************************************************************************
-
-    // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
-        startTime = Time.time;
+        base.Start();
+        npc_mechanics = GetComponent<NPC_Mechanics>();
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    protected override void Update()
     {
-        AnimateNPC();
+        if(npc_mechanics.identity.npc_movestyle != NPC_MoveStyle.Spin)
+        {
+            base.Update();
+        }
     }
 
-    /*
-     * Animate Steps ( ) 
-     * 
-     * This method checks the moveDirection for Static or moving
-     * 
-     * If the gameObject is moving, the method will alternate the color of the 
-     * sprite every one second while moving. 
-     * 
-     * Otherwise, the color of the sprite is black. 
-     * 
-     * This simulates using sprites for walking and being stationary.
-     */
-    void AnimateNPC()
+    public void DisplaySprite(MovementDirection facingDirection)
     {
-        moveDirection = OW_Globals.GetDirection(
-            GetComponent<NPC_Mechanics>().moveDirection);
-
-        if (moveDirection != MovementDirection.NaN)
+        // Get sprites for direciton we are moving
+        spriteRenderer.sprite = facingDirection switch
         {
-            // Actively moving
-            float elapsedTime = Time.time - startTime;
-            if (elapsedTime >= walkTime)
-            {
-                // Reset start time
-                startTime = Time.time;
-
-                // Flip colorIndex
-                colorIndex = (colorIndex == 0) ? 1 : 0;
-            }
-
-            GetComponent<SpriteRenderer>().color = spriteColors[colorIndex];
-        }
-        else
-        {
-            // Not walking
-            GetComponent<SpriteRenderer>().color = Color.gray;
-        }
+            MovementDirection.Left => spinSprites[leftSpriteIdx],
+            MovementDirection.Right => spinSprites[rightSpriteIdx],
+            MovementDirection.Down => spinSprites[downSpriteIdx],
+            _ => spinSprites[upSpriteIdx]
+        };
     }
 }
