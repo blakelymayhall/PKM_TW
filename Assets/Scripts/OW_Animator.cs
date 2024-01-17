@@ -36,6 +36,8 @@ public abstract class OW_Animator : MonoBehaviour
     protected virtual void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        mechanics = GetComponent<OW_MovingObject>();
+        
         UpdateDirectionSprites(OW_Globals.GetDirection(Vector3.zero));
     }
 

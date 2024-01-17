@@ -12,10 +12,4 @@ public class OW_PlayerAnimator : OW_Animator
     /* PRIVATE VARS */
     //*************************************************************************
     //*************************************************************************
-
-    protected override void Start()
-    {
-        base.Start();
-        mechanics = GetComponent<OW_MovingObject>();
-    }
 }
