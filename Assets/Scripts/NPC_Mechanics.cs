@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -11,7 +9,7 @@ public class NPC_Mechanics : OW_MovingObject
     //*************************************************************************
     public Tilemap tilemap;
     public NPC_Identity identity;
-    
+
     public List<Vector2> waypoints = new();
     public Vector3 moveDirection = Vector3.zero;
     public List<MovementDirection> spinDirections = new();
@@ -25,6 +23,9 @@ public class NPC_Mechanics : OW_MovingObject
     private int waypointIndex = 1;
     private int spinIndex = 1;
     private MovementDirection facingDirection;
+    private readonly int SPOTTING_DISTANCE = 3;
+    private GameObject player;
+    private bool playerSpotted = false;
     //*************************************************************************
 
     // Start is called before the first frame update
@@ -33,23 +34,33 @@ public class NPC_Mechanics : OW_MovingObject
         base.Start();
         identity = GetComponent<NPC_Identity>();
         animator = GetComponent<NPC_Animator>();
+        player = GameObject.FindWithTag("Player");
     }
 
     void Update()
     {
-        switch(identity.npc_movestyle)
+        if (playerSpotted || PlayerInLOS())
         {
-            case NPC_MoveStyle.Wander:
-                Wander();
-                break;
-            case NPC_MoveStyle.Spin:
-                if(!isMoving)
-                {
-                    StartCoroutine(Spin());
-                }
-                break;
-            default:
-                break;
+            identity.npc_movestyle = NPC_MoveStyle.None;
+            player.GetComponent<OW_PlayerMechanics>().isSpotted = true;
+            MoveToPlayer();
+        }
+        else
+        {
+            switch(identity.npc_movestyle)
+            {
+                case NPC_MoveStyle.Wander:
+                    Wander();
+                    break;
+                case NPC_MoveStyle.Spin:
+                    if(!isMoving)
+                    {
+                        StartCoroutine(Spin());
+                    }
+                    break;
+                default:
+                    break;
+            } 
         }
     }
 
@@ -65,6 +76,10 @@ public class NPC_Mechanics : OW_MovingObject
             if(!facingMoveDirection)
             {
                 GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
+                if (PlayerInLOS())
+                {
+                    return;
+                }
             }
 
             Move(GetTargetTile(waypoints[waypointIndex], tilemap));
@@ -88,6 +103,12 @@ public class NPC_Mechanics : OW_MovingObject
         }
         facingDirection = spinDirections[spinIndex];
         animator.DisplaySprite(facingDirection);
+        if (PlayerInLOS())
+        {
+            GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
+            isMoving = false;
+            yield break;
+        }
         
         spinIndex++;
         if(spinIndex >= spinDirections.Count)
@@ -96,5 +117,32 @@ public class NPC_Mechanics : OW_MovingObject
         }
 
         isMoving = false;
+    }
+
+    private bool PlayerInLOS() 
+    {
+        Vector3 target = transform.position + 
+            SPOTTING_DISTANCE * OW_Globals.GetVector3FromDirection(facingDirection);
+
+        // Cast a ray in the facing direction to confirm that 
+        // nothing rigid is in our path. Disable this objects collider.
+        GetComponent<BoxCollider2D>().enabled = false;
+        RaycastHit2D hit =
+            Physics2D.Linecast(transform.position, target);
+        GetComponent<BoxCollider2D>().enabled = true;
+
+        playerSpotted = hit.transform != null && 
+            hit.collider.gameObject == player;
+        return playerSpotted;
+    }
+
+    private void MoveToPlayer()
+    {
+        noInput = false;
+        Vector3 oppositeFacingDirection = 
+            -1*OW_Globals.GetVector3FromDirection(facingDirection);
+        Vector3 target = player.transform.position+oppositeFacingDirection;
+        Move(target, tilemap);
+        noInput = true;
     }
 }

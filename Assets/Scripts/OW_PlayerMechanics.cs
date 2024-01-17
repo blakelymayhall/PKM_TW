@@ -37,27 +37,35 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     void Update()
     {
-        GetUserInput();
-    
-        if (!noInput && !isMoving)
+        if (!isSpotted)
         {
-            bool facingMoveDirection = 
-                OW_Globals.GetVector3FromDirection(facingDirection) == inputDirection;
-            facingDirection = OW_Globals.GetDirection(inputDirection);
-
-            if(!facingMoveDirection)
-            {
-                playerAnimator.UpdateDirectionSprites(facingDirection);
-            }
-
-            StartCoroutine(CheckHeld());
-            if (startMove) 
-            {
-                Move(GetTargetTile(inputDirection, tilemap));
-            }
-        }
+            GetUserInput();
         
-        cameraManager.playerPos = transform.position;
+            if (!noInput && !isMoving)
+            {
+                bool facingMoveDirection = 
+                    OW_Globals.GetVector3FromDirection(facingDirection) == inputDirection;
+                facingDirection = OW_Globals.GetDirection(inputDirection);
+
+                if(!facingMoveDirection)
+                {
+                    playerAnimator.UpdateDirectionSprites(facingDirection);
+                }
+
+                StartCoroutine(CheckHeld());
+                if (startMove) 
+                {
+                    Move(GetTargetTile(inputDirection, tilemap));
+                }
+            }
+
+            cameraManager.playerPos = transform.position;
+        }
+        else 
+        {
+            isMoving = false;
+            noInput = true;
+        }
     }
 
     private void GetUserInput()
