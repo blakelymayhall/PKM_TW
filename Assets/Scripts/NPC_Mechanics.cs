@@ -69,14 +69,12 @@ public class NPC_Mechanics : OW_MovingObject
         noInput = false;
         if(!isMoving)
         {
-            bool facingMoveDirection = 
-                (Vector2)facingDirection == waypoints[waypointIndex];
+            bool facingMoveDirection = (Vector2)facingDirection == waypoints[waypointIndex];
             facingDirection = waypoints[waypointIndex];
 
             if(!facingMoveDirection)
             {
-                GetComponent<NPC_Animator>().
-                    UpdateDirectionSprites(facingDirection);
+                GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
                 if (PlayerInLOS())
                 {
                     return;
@@ -106,8 +104,7 @@ public class NPC_Mechanics : OW_MovingObject
         animator.DisplaySprite(facingDirection);
         if (PlayerInLOS())
         {
-            GetComponent<NPC_Animator>().
-                UpdateDirectionSprites(facingDirection);
+            GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
             isMoving = false;
             yield break;
         }
@@ -131,8 +128,7 @@ public class NPC_Mechanics : OW_MovingObject
         RaycastHit2D hit = Physics2D.Linecast(transform.position, target);
         GetComponent<BoxCollider2D>().enabled = true;
 
-        playerSpotted = hit.transform != null && 
-            hit.collider.gameObject == player;
+        playerSpotted = hit.transform != null && hit.collider.gameObject == player;
         return playerSpotted;
     }
 
@@ -140,7 +136,8 @@ public class NPC_Mechanics : OW_MovingObject
     {
         noInput = false;
         Vector3 oppositeFacingDirection = -1*facingDirection;
-        Vector3 target = player.transform.position+oppositeFacingDirection;
+        Vector3Int playerTile = tilemap.WorldToCell(player.transform.position);
+        Vector3 target = tilemap.GetCellCenterWorld(playerTile)+oppositeFacingDirection;
         Move(target, tilemap);
         noInput = true;
     }

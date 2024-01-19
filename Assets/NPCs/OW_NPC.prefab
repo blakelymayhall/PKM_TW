@@ -173,7 +173,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b39a04549c53645f99957d0798a3a519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  npc_types: 
+  npc_type: 
+  npc_movestyle: 0
 --- !u!114 &8912494214164238869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,12 +187,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 832c1abb8bdd14e05a604464d95749e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isWander: 0
+  moveTime: 0.23
+  noInput: 1
+  isMoving: 0
+  isSprinting: 0
+  tilemap: {fileID: 0}
+  identity: {fileID: 0}
   waypoints: []
   moveDirection: {x: 0, y: 0, z: 0}
-  isSpin: 0
-  spinDirections: 
-  spotDistance: 3
+  spinDirections: []
+  spinTime: 2
 --- !u!114 &6466904474790272535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,3 +209,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a60d8e503c7174df5b12bf6ac47e57c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sprites: []
+  spinSprites: []
