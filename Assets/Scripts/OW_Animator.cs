@@ -38,7 +38,7 @@ public abstract class OW_Animator : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         mechanics = GetComponent<OW_MovingObject>();
         
-        UpdateDirectionSprites(OW_Globals.GetDirection(Vector3.zero));
+        UpdateDirectionSprites(Vector3.zero);
     }
 
     protected virtual void Update()
@@ -61,19 +61,18 @@ public abstract class OW_Animator : MonoBehaviour
         }
     }
 
-    public void UpdateDirectionSprites(MovementDirection facingDirection)
+    public void UpdateDirectionSprites(Vector3 facingDirection)
     {
-        // Get sprites for direciton we are moving
-        directionSprites = facingDirection switch
+        Dictionary<Vector3, int> directionToSpriteIdx = new()
         {
-            MovementDirection.Left => 
-                sprites.GetRange(leftSpriteStartIdx, noSprites),
-            MovementDirection.Right =>
-                sprites.GetRange(rightSpriteStartIdx, noSprites),
-            MovementDirection.Down => 
-                sprites.GetRange(downSpriteStartIdx, noSprites),
-            _ => sprites.GetRange(upSpriteStartIdx, noSprites)
+            { Vector3.left, leftSpriteStartIdx },
+            { Vector3.right, rightSpriteStartIdx },
+            { Vector3.down, downSpriteStartIdx },
+            { Vector3.up, upSpriteStartIdx },
         };
+        directionSprites = directionToSpriteIdx.TryGetValue(facingDirection, out int spriteIdx)
+            ? sprites.GetRange(spriteIdx,noSprites)
+            : sprites.GetRange(upSpriteStartIdx,noSprites);
         spriteRenderer.sprite = directionSprites[stillSprite];
     }
 }

@@ -12,7 +12,7 @@ public class NPC_Mechanics : OW_MovingObject
 
     public List<Vector2> waypoints = new();
     public Vector3 moveDirection = Vector3.zero;
-    public List<MovementDirection> spinDirections = new();
+    public List<Vector2> spinDirections = new();
     public float spinTime = 2f;
     //*************************************************************************
 
@@ -22,7 +22,7 @@ public class NPC_Mechanics : OW_MovingObject
 
     private int waypointIndex = 1;
     private int spinIndex = 1;
-    private MovementDirection facingDirection;
+    private Vector3 facingDirection;
     private readonly int SPOTTING_DISTANCE = 3;
     private GameObject player;
     private bool playerSpotted = false;
@@ -70,12 +70,13 @@ public class NPC_Mechanics : OW_MovingObject
         if(!isMoving)
         {
             bool facingMoveDirection = 
-                (Vector2) OW_Globals.GetVector3FromDirection(facingDirection) == waypoints[waypointIndex];
-            facingDirection = OW_Globals.GetDirection(waypoints[waypointIndex]);
+                (Vector2)facingDirection == waypoints[waypointIndex];
+            facingDirection = waypoints[waypointIndex];
 
             if(!facingMoveDirection)
             {
-                GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
+                GetComponent<NPC_Animator>().
+                    UpdateDirectionSprites(facingDirection);
                 if (PlayerInLOS())
                 {
                     return;
@@ -105,7 +106,8 @@ public class NPC_Mechanics : OW_MovingObject
         animator.DisplaySprite(facingDirection);
         if (PlayerInLOS())
         {
-            GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
+            GetComponent<NPC_Animator>().
+                UpdateDirectionSprites(facingDirection);
             isMoving = false;
             yield break;
         }
@@ -121,14 +123,12 @@ public class NPC_Mechanics : OW_MovingObject
 
     private bool PlayerInLOS() 
     {
-        Vector3 target = transform.position + 
-            SPOTTING_DISTANCE * OW_Globals.GetVector3FromDirection(facingDirection);
+        Vector3 target = transform.position+SPOTTING_DISTANCE*facingDirection;
 
         // Cast a ray in the facing direction to confirm that 
         // nothing rigid is in our path. Disable this objects collider.
         GetComponent<BoxCollider2D>().enabled = false;
-        RaycastHit2D hit =
-            Physics2D.Linecast(transform.position, target);
+        RaycastHit2D hit = Physics2D.Linecast(transform.position, target);
         GetComponent<BoxCollider2D>().enabled = true;
 
         playerSpotted = hit.transform != null && 
@@ -139,8 +139,7 @@ public class NPC_Mechanics : OW_MovingObject
     private void MoveToPlayer()
     {
         noInput = false;
-        Vector3 oppositeFacingDirection = 
-            -1*OW_Globals.GetVector3FromDirection(facingDirection);
+        Vector3 oppositeFacingDirection = -1*facingDirection;
         Vector3 target = player.transform.position+oppositeFacingDirection;
         Move(target, tilemap);
         noInput = true;

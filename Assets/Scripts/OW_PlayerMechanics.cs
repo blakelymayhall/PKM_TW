@@ -17,7 +17,7 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     private Vector3 inputDirection = Vector3.zero;
     private bool startMove = false;
-    private MovementDirection facingDirection;
+    private Vector3 facingDirection;
     //*************************************************************************
 
     void Awake()
@@ -43,9 +43,8 @@ public class OW_PlayerMechanics : OW_MovingObject
         
             if (!noInput && !isMoving)
             {
-                bool facingMoveDirection = 
-                    OW_Globals.GetVector3FromDirection(facingDirection) == inputDirection;
-                facingDirection = OW_Globals.GetDirection(inputDirection);
+                bool facingMoveDirection = facingDirection == inputDirection;
+                facingDirection = inputDirection;
 
                 if(!facingMoveDirection)
                 {

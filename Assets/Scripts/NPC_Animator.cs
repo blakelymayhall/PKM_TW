@@ -26,21 +26,23 @@ public class NPC_Animator : OW_Animator
 
     protected override void Update()
     {
-        if(npc_mechanics.identity.npc_movestyle != NPC_MoveStyle.Spin)
+        if (npc_mechanics.identity.npc_movestyle != NPC_MoveStyle.Spin)
         {
             base.Update();
         }
     }
 
-    public void DisplaySprite(MovementDirection facingDirection)
+    public void DisplaySprite(Vector3 facingDirection)
     {
-        // Get sprites for direciton we are moving
-        spriteRenderer.sprite = facingDirection switch
+        Dictionary<Vector3, int> directionToSpriteIdx = new()
         {
-            MovementDirection.Left => spinSprites[leftSpriteIdx],
-            MovementDirection.Right => spinSprites[rightSpriteIdx],
-            MovementDirection.Down => spinSprites[downSpriteIdx],
-            _ => spinSprites[upSpriteIdx]
+            { Vector3.left, leftSpriteIdx },
+            { Vector3.right, rightSpriteIdx },
+            { Vector3.down, downSpriteIdx },
+            { Vector3.up, upSpriteIdx },
         };
+        spriteRenderer.sprite = directionToSpriteIdx.TryGetValue(facingDirection, out int spriteIdx)
+            ? spinSprites[spriteIdx]
+            : spinSprites[upSpriteIdx];
     }
 }
