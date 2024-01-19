@@ -1992,6 +1992,14 @@ PrefabInstance:
       propertyPath: spinDirections.Array.data[1]
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8912494214164238869, guid: 536a576357c17474a93c4881a195c60a, type: 3}
+      propertyPath: spinDirections.Array.data[0].y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8912494214164238869, guid: 536a576357c17474a93c4881a195c60a, type: 3}
+      propertyPath: spinDirections.Array.data[1].y
+      value: -1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
