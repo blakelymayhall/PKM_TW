@@ -23,7 +23,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     //*************************************************************************
     private new Rigidbody2D rigidbody2D;
 
-    private Vector2 tileSize = new Vector2(1f, 1f);
+    private Vector2 tileSize = new Vector2(0.32f, 0.32f);
     //*************************************************************************
 
     protected virtual void Start()

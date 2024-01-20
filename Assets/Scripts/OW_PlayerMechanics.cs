@@ -12,7 +12,6 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     /* PRIVATE VARS */
     //*************************************************************************
-    private OW_CameraManager cameraManager;
     private OW_PlayerAnimator playerAnimator;
 
     private Vector3 inputDirection = Vector3.zero;
@@ -31,8 +30,6 @@ public class OW_PlayerMechanics : OW_MovingObject
     {
         base.Start();
         playerAnimator = GetComponent<OW_PlayerAnimator>();
-        cameraManager = Camera.main.GetComponent<OW_CameraManager>();
-        cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
     }
 
     void Update()
@@ -57,8 +54,6 @@ public class OW_PlayerMechanics : OW_MovingObject
                     Move(GetTargetTile(inputDirection, tilemap));
                 }
             }
-
-            cameraManager.playerPos = transform.position;
         }
         else 
         {
