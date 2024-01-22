@@ -8,7 +8,6 @@ public abstract class OW_MovingObject : MonoBehaviour
     /* PUBLIC VARS */
     //*************************************************************************
     public new Rigidbody2D rigidbody2D;
-    public float moveTime = 0.23f; // Seconds it will take object to move
     public bool noInput = true;
     public bool isMoving = false;
     public bool isSprinting = false;
@@ -17,8 +16,8 @@ public abstract class OW_MovingObject : MonoBehaviour
     /* PROTECTED VARS */
     //*************************************************************************
     protected float sprintMoveTime = 0.23f;
-    protected float walkMoveTime = 0.8f;
-    protected Vector2 tileSize = new Vector2(0.16f, 0.16f);
+    protected float walkMoveTime = 0.5f;
+    protected Vector2 tileSize = new(0.32f, 0.32f);
     //*************************************************************************
 
     /* PRIVATE VARS */

@@ -42,7 +42,7 @@ public class NPC_Mechanics : OW_MovingObject
         if (playerSpotted || PlayerInLOS())
         {
             identity.npc_movestyle = NPC_MoveStyle.None;
-            player.GetComponent<OW_PlayerMechanics>().isSpotted = true;
+            player.GetComponent<OW_Player>().playerMode = OW_PlayerModes.SPOTTED;
             MoveToPlayer();
         }
         else

@@ -7,23 +7,24 @@ public class OW_PlayerMechanics : OW_MovingObject
     /* PUBLIC VARS */
     //*************************************************************************
     public Tilemap tilemap;
-    public bool isSpotted = false;
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
     private OW_PlayerAnimator playerAnimator;
+    private OW_Player player;
 
+    private bool initMode = false;
     private Vector3 inputDirection = Vector3.zero;
-    private bool startMove = false;
-    private Vector3 facingDirection;
+    private Vector3 facingDirection = Vector3.zero;
     private readonly float KEY_HOLD_TIME = 0.15f; 
+    private readonly float TARGET_TOLERANCE = 1e-3f;
     //*************************************************************************
 
     void Awake()
     {
-        sprintMoveTime = 0.19f;
-        walkMoveTime = 0.25f;
+        sprintMoveTime = 0.2f;
+        walkMoveTime = 0.4f;
         DontDestroyOnLoad(gameObject);
     }
 
@@ -31,35 +32,56 @@ public class OW_PlayerMechanics : OW_MovingObject
     {
         base.Start();
         playerAnimator = GetComponent<OW_PlayerAnimator>();
+        player = GetComponent<OW_Player>();
     }
 
     void Update()
     {
-        if (!isSpotted)
+        switch(player.playerMode)
         {
-            GetUserInput();
-        
-            if (!noInput && !isMoving)
-            {
-                bool facingMoveDirection = facingDirection == inputDirection;
-                facingDirection = inputDirection;
-
-                if(!facingMoveDirection)
+            case OW_PlayerModes.STANDBY:
+                GetUserInput();
+                if (!noInput || isMoving)
                 {
-                    playerAnimator.UpdateDirectionSprites(facingDirection);
+                    bool facingMoveDirection = facingDirection == inputDirection;
+                    facingDirection = inputDirection;
+                    if(!facingMoveDirection)
+                    {
+                        playerAnimator.UpdateDirectionSprites(facingDirection);
+                    }
+                    
+                    player.playerMode = isMoving ?  
+                        OW_PlayerModes.MOVING : OW_PlayerModes.MOVE_DELAY;
+                    initMode = true;
                 }
+                break;
+            case OW_PlayerModes.MOVE_DELAY:
+                GetUserInput();
 
-                StartCoroutine(CheckHeld());    
-                if (startMove) 
+                if (initMode)
                 {
+                    StartCoroutine(CheckHeld());
+                    initMode = false;
+                }
+                break;
+            case OW_PlayerModes.MOVING:
+                GetUserInput();
+
+                if (initMode)
+                {
+                    playerAnimator.ShowWalkingSprite();
                     Move(GetTargetTile(inputDirection, tilemap));
+                    initMode = false;
                 }
-            }
-        }
-        else 
-        {
-            isMoving = false;
-            noInput = true;
+                break;
+            case OW_PlayerModes.SPOTTED:
+                isMoving = false;
+                noInput = true;
+                break;
+            case OW_PlayerModes.ENGAGED:
+                break;
+            default:
+                break;
         }
     }
 
@@ -85,12 +107,13 @@ public class OW_PlayerMechanics : OW_MovingObject
         {
             if (noInput) 
             {
-                startMove = false;
+                player.playerMode = OW_PlayerModes.STANDBY;
                 yield break;
             }
             yield return null;
         }
-        startMove = true;
+        player.playerMode = OW_PlayerModes.MOVING;
+        initMode = true;
     }
 
     protected override IEnumerator SmoothMovement(Vector2 target)
@@ -107,13 +130,14 @@ public class OW_PlayerMechanics : OW_MovingObject
             rigidbody2D.MovePosition(newPostion);
 
             float sqrRemainingDistance = (rigidbody2D.position - target).sqrMagnitude;
-            if (sqrRemainingDistance < 1e-3)
+            if (sqrRemainingDistance < TARGET_TOLERANCE)
             {
                 bool facingMoveDirection = facingDirection == inputDirection;
                 if (noInput || !facingMoveDirection)
                 {
                     rigidbody2D.MovePosition(target);
-                    isMoving = false;
+                    player.playerMode = OW_PlayerModes.STANDBY;
+                    isMoving = !noInput;
                     yield break;
                 }
                 else 
