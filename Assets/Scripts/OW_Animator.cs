@@ -24,8 +24,8 @@ public abstract class OW_Animator : MonoBehaviour
     protected int spriteIndex = 0;
 
     protected float timer = 0f;
-    protected float walkTime = 0.16f;
-    protected float runTime = 0.12f;
+    protected float walkTime = 0.2f;
+    protected float runTime = 0.15f;
     //*************************************************************************
 
     /* PRIVATE VARS */
@@ -55,9 +55,9 @@ public abstract class OW_Animator : MonoBehaviour
 
         if (timer > (mechanics.isSprinting ? runTime : walkTime))
         {
+            timer = 0f;
             spriteIndex = (spriteIndex + 1) % directionSprites.Count;
             spriteRenderer.sprite = directionSprites[spriteIndex];
-            timer = 0f;
         }
     }
 

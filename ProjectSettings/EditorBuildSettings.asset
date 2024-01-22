@@ -14,7 +14,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/MovementExperiment.unity
     guid: 1af4607fd16ef48b2ba5032c0ea8ef83
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/NPC_Dev.unity
     guid: 76511495b9f604e5dad946c94943cfa6
+  - enabled: 1
+    path: Assets/Scenes/Map_Dev.unity
+    guid: 91c516a25d8d04318aed50181f578389
   m_configObjects: {}

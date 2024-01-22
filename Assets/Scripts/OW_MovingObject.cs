@@ -7,6 +7,7 @@ public abstract class OW_MovingObject : MonoBehaviour
 
     /* PUBLIC VARS */
     //*************************************************************************
+    public new Rigidbody2D rigidbody2D;
     public float moveTime = 0.23f; // Seconds it will take object to move
     public bool noInput = true;
     public bool isMoving = false;
@@ -16,14 +17,13 @@ public abstract class OW_MovingObject : MonoBehaviour
     /* PROTECTED VARS */
     //*************************************************************************
     protected float sprintMoveTime = 0.23f;
-    protected float walkMoveTime = 0.33f;
+    protected float walkMoveTime = 0.8f;
+    protected Vector2 tileSize = new Vector2(0.16f, 0.16f);
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
-    private new Rigidbody2D rigidbody2D;
 
-    private Vector2 tileSize = new Vector2(0.32f, 0.32f);
     //*************************************************************************
 
     protected virtual void Start()
@@ -43,40 +43,35 @@ public abstract class OW_MovingObject : MonoBehaviour
         return tilemap.GetCellCenterWorld(nextTileCellPosition);
     }
 
-    // Move returns true if it is able to move and false if not. 
-    // Move takes parameters for x direction, y direction
-    protected virtual bool Move(Vector3 target, bool delayMove = false)
+    // Returns true if it is able to move and false if not. 
+    protected virtual void Move(Vector3 target)
     {
         if (CanMove(target))
         {
             StartCoroutine(SmoothMovement(target));
-            return true;
         }
-
-        return false;
     }
 
     // Co-routine for moving units from one space to next, takes a 
     // parameter target to specify where to move to.
-    protected IEnumerator SmoothMovement(Vector3 target)
+    protected virtual IEnumerator SmoothMovement(Vector2 target)
     {
         isMoving = true;
 
-        float sqrRemainingDistance = (transform.position - target).sqrMagnitude;
+        float sqrRemainingDistance = (rigidbody2D.position - target).sqrMagnitude;
         while (sqrRemainingDistance > float.Epsilon)
         {
-            float inverseMoveTime = 1f /
-                (isSprinting ? sprintMoveTime : walkMoveTime);
+            float inverseMoveTime = 1f / (isSprinting ? sprintMoveTime : walkMoveTime);
             Vector3 newPostion = Vector3.MoveTowards(
                 rigidbody2D.position,
                 target,
                 inverseMoveTime * Time.deltaTime);
             rigidbody2D.MovePosition(newPostion);
 
-            sqrRemainingDistance = (transform.position - target).sqrMagnitude;
+            sqrRemainingDistance = (rigidbody2D.position - target).sqrMagnitude;
             yield return null;
         }
-
+    
         rigidbody2D.MovePosition(target);
         isMoving = false;
     }
@@ -87,18 +82,9 @@ public abstract class OW_MovingObject : MonoBehaviour
         // Cast a ray in the direction of the move to confirm that 
         // nothing rigid is in our path. Disable this objects collider.
         GetComponent<BoxCollider2D>().enabled = false;
-        RaycastHit2D hit =
-            Physics2D.Linecast(transform.position, target);
+        RaycastHit2D hit = Physics2D.Linecast(transform.position, target);
         GetComponent<BoxCollider2D>().enabled = true;
 
-        if (hit.transform == null)
-        {
-            return true;
-        }
-
-        // GameObject hitComponent = hit.collider.gameObject;
-        // Debug.Log(hitComponent.name);
-
-        return false;
+        return hit.transform == null;
     }
 }
