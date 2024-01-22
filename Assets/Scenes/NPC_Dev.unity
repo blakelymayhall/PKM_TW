@@ -143,6 +143,22 @@ PrefabInstance:
       propertyPath: m_UseFullKinematicContacts
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 8aad6590c676e4da6983678435775ac4, type: 3}
+      propertyPath: m_Size.x
+      value: 0.64508295
+      objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 8aad6590c676e4da6983678435775ac4, type: 3}
+      propertyPath: m_Size.y
+      value: 0.6450826
+      objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 8aad6590c676e4da6983678435775ac4, type: 3}
+      propertyPath: m_Offset.x
+      value: -0.009981394
+      objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 8aad6590c676e4da6983678435775ac4, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.036409557
+      objectReference: {fileID: 0}
     - target: {fileID: 5077362107726169654, guid: 8aad6590c676e4da6983678435775ac4, type: 3}
       propertyPath: m_Name
       value: Experiment
@@ -1770,7 +1786,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8414274772652233077, guid: 536a576357c17474a93c4881a195c60a, type: 3}
       propertyPath: npc_movestyle
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1572203962058635717, guid: 536a576357c17474a93c4881a195c60a, type: 3}
       propertyPath: m_CollisionDetection
@@ -1787,6 +1803,22 @@ PrefabInstance:
     - target: {fileID: 3003965608833947923, guid: 536a576357c17474a93c4881a195c60a, type: 3}
       propertyPath: m_Color.r
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 536a576357c17474a93c4881a195c60a, type: 3}
+      propertyPath: m_Size.x
+      value: 0.84630823
+      objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 536a576357c17474a93c4881a195c60a, type: 3}
+      propertyPath: m_Size.y
+      value: 0.9938736
+      objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 536a576357c17474a93c4881a195c60a, type: 3}
+      propertyPath: m_Offset.x
+      value: -0.00000023841858
+      objectReference: {fileID: 0}
+    - target: {fileID: 3550079752822335882, guid: 536a576357c17474a93c4881a195c60a, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.0674932
       objectReference: {fileID: 0}
     - target: {fileID: 5077362107726169654, guid: 536a576357c17474a93c4881a195c60a, type: 3}
       propertyPath: m_Name

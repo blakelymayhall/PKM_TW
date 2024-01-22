@@ -12,18 +12,18 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     /* PRIVATE VARS */
     //*************************************************************************
-    private OW_CameraManager cameraManager;
     private OW_PlayerAnimator playerAnimator;
 
     private Vector3 inputDirection = Vector3.zero;
     private bool startMove = false;
     private Vector3 facingDirection;
+    private readonly float KEY_HOLD_TIME = 0.15f; 
     //*************************************************************************
 
     void Awake()
     {
-        // Make sure the player object is not destroyed
-        // when a new scene is loaded
+        sprintMoveTime = 0.19f;
+        walkMoveTime = 0.25f;
         DontDestroyOnLoad(gameObject);
     }
 
@@ -31,8 +31,6 @@ public class OW_PlayerMechanics : OW_MovingObject
     {
         base.Start();
         playerAnimator = GetComponent<OW_PlayerAnimator>();
-        cameraManager = Camera.main.GetComponent<OW_CameraManager>();
-        cameraManager.playerPos = GetComponent<Rigidbody2D>().position;
     }
 
     void Update()
@@ -51,14 +49,12 @@ public class OW_PlayerMechanics : OW_MovingObject
                     playerAnimator.UpdateDirectionSprites(facingDirection);
                 }
 
-                StartCoroutine(CheckHeld());
+                StartCoroutine(CheckHeld());    
                 if (startMove) 
                 {
                     Move(GetTargetTile(inputDirection, tilemap));
                 }
             }
-
-            cameraManager.playerPos = transform.position;
         }
         else 
         {
@@ -82,12 +78,10 @@ public class OW_PlayerMechanics : OW_MovingObject
         noInput = inputDirection == Vector3.zero;
     }    
 
-    // Require the input key be held before moving 
-    // This allows user to turn directions without moving
     private IEnumerator CheckHeld()
     {
         float startTime = Time.time;
-        while (Time.time-startTime < 0.15f)
+        while (Time.time-startTime < KEY_HOLD_TIME)
         {
             if (noInput) 
             {
@@ -97,6 +91,42 @@ public class OW_PlayerMechanics : OW_MovingObject
             yield return null;
         }
         startMove = true;
+    }
+
+    protected override IEnumerator SmoothMovement(Vector2 target)
+    {
+        isMoving = true;
+
+        while (true)
+        {
+            float inverseMoveTime = 1f / (isSprinting ? sprintMoveTime : walkMoveTime);
+            Vector3 newPostion = Vector3.MoveTowards(
+                rigidbody2D.position,
+                target,
+                inverseMoveTime * Time.deltaTime);
+            rigidbody2D.MovePosition(newPostion);
+
+            float sqrRemainingDistance = (rigidbody2D.position - target).sqrMagnitude;
+            if (sqrRemainingDistance < 1e-3)
+            {
+                bool facingMoveDirection = facingDirection == inputDirection;
+                if (noInput || !facingMoveDirection)
+                {
+                    rigidbody2D.MovePosition(target);
+                    isMoving = false;
+                    yield break;
+                }
+                else 
+                {
+                    Vector3 nextTilePosition = target + new Vector2(
+                        inputDirection.x * tileSize.x,
+                        inputDirection.y * tileSize.y);
+                    Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
+                    target = tilemap.GetCellCenterWorld(nextTileCellPosition);
+                }
+            }
+            yield return null;
+        }
     }
 }
 

@@ -138,7 +138,7 @@ public class NPC_Mechanics : OW_MovingObject
         Vector3 oppositeFacingDirection = -1*facingDirection;
         Vector3Int playerTile = tilemap.WorldToCell(player.transform.position);
         Vector3 target = tilemap.GetCellCenterWorld(playerTile)+oppositeFacingDirection;
-        Move(target, tilemap);
+        Move(target);
         noInput = true;
     }
 }
