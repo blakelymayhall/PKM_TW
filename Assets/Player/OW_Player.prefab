@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5448510050373472474}
   - component: {fileID: 3550079752822335882}
   - component: {fileID: 1572203962058635717}
+  - component: {fileID: 3415843073438134258}
   m_Layer: 0
   m_Name: OW_Player
   m_TagString: Player
@@ -30,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 5077362107726169654}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -100,13 +101,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd23be639f71e40ca980ec6ef2f92e8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveTime: 0
+  rigidbody2D: {fileID: 0}
+  noInput: 1
   isMoving: 0
   isSprinting: 0
-  facingDirection: 2
   tilemap: {fileID: 0}
-  targetLocation: {x: 0, y: 0}
-  isSpotted: 0
 --- !u!114 &5448510050373472474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,7 +135,6 @@ MonoBehaviour:
   - {fileID: -259104685, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
   - {fileID: -1197127836, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
   - {fileID: 187429762, guid: 19fe63207cc7e476e96084dd8f879113, type: 3}
-  walkTime: 0.6
 --- !u!61 &3550079752822335882
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -209,3 +207,16 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &3415843073438134258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5077362107726169654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3a71869db4c940cdb4c4ce79edd1982, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerMode: 0
