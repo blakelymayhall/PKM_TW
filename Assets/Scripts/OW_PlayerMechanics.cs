@@ -50,7 +50,7 @@ public class OW_PlayerMechanics : OW_MovingObject
                         playerAnimator.UpdateDirectionSprites(facingDirection);
                     }
                     
-                    player.playerMode = isMoving ?  
+                    player.playerMode = isMoving || facingMoveDirection ?  
                         OW_PlayerModes.MOVING : OW_PlayerModes.MOVE_DELAY;
                     initMode = true;
                 }
@@ -132,8 +132,12 @@ public class OW_PlayerMechanics : OW_MovingObject
             float sqrRemainingDistance = (rigidbody2D.position - target).sqrMagnitude;
             if (sqrRemainingDistance < TARGET_TOLERANCE)
             {
+                Vector3 nextTilePosition = target + new Vector2(
+                    inputDirection.x * tileSize.x,
+                    inputDirection.y * tileSize.y);
+                Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
                 bool facingMoveDirection = facingDirection == inputDirection;
-                if (noInput || !facingMoveDirection)
+                if (noInput || !facingMoveDirection || !CanMove(tilemap.GetCellCenterWorld(nextTileCellPosition)))
                 {
                     rigidbody2D.MovePosition(target);
                     player.playerMode = OW_PlayerModes.STANDBY;
@@ -142,10 +146,6 @@ public class OW_PlayerMechanics : OW_MovingObject
                 }
                 else 
                 {
-                    Vector3 nextTilePosition = target + new Vector2(
-                        inputDirection.x * tileSize.x,
-                        inputDirection.y * tileSize.y);
-                    Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
                     target = tilemap.GetCellCenterWorld(nextTileCellPosition);
                 }
             }
