@@ -21,7 +21,12 @@ public class NPC_Animator : OW_Animator
     protected override void Start()
     {
         base.Start();
+        walkTime = 0.25f;
+        runTime = 0.15f;
+
         npc_mechanics = GetComponent<NPC_Mechanics>();
+        
+        UpdateDirectionSprites(npc_mechanics.facingDirection);
     }
 
     protected override void Update()
@@ -30,19 +35,5 @@ public class NPC_Animator : OW_Animator
         {
             base.Update();
         }
-    }
-
-    public void DisplaySprite(Vector3 facingDirection)
-    {
-        Dictionary<Vector3, int> directionToSpriteIdx = new()
-        {
-            { Vector3.left, leftSpriteIdx },
-            { Vector3.right, rightSpriteIdx },
-            { Vector3.down, downSpriteIdx },
-            { Vector3.up, upSpriteIdx },
-        };
-        spriteRenderer.sprite = directionToSpriteIdx.TryGetValue(facingDirection, out int spriteIdx)
-            ? spinSprites[spriteIdx]
-            : spinSprites[upSpriteIdx];
     }
 }

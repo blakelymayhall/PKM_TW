@@ -38,7 +38,7 @@ public abstract class OW_Animator : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         mechanics = GetComponent<OW_MovingObject>();
         
-        UpdateDirectionSprites(Vector3.zero);
+        UpdateDirectionSprites(Vector2.zero);
     }
 
     protected virtual void Update()
@@ -61,14 +61,14 @@ public abstract class OW_Animator : MonoBehaviour
         }
     }
 
-    public void UpdateDirectionSprites(Vector3 facingDirection)
+    public void UpdateDirectionSprites(Vector2 facingDirection)
     {
-        Dictionary<Vector3, int> directionToSpriteIdx = new()
+        Dictionary<Vector2, int> directionToSpriteIdx = new()
         {
-            { Vector3.left, leftSpriteStartIdx },
-            { Vector3.right, rightSpriteStartIdx },
-            { Vector3.down, downSpriteStartIdx },
-            { Vector3.up, upSpriteStartIdx },
+            { Vector2.left, leftSpriteStartIdx },
+            { Vector2.right, rightSpriteStartIdx },
+            { Vector2.down, downSpriteStartIdx },
+            { Vector2.up, upSpriteStartIdx },
         };
         directionSprites = directionToSpriteIdx.TryGetValue(facingDirection, out int spriteIdx)
             ? sprites.GetRange(spriteIdx,noSprites)

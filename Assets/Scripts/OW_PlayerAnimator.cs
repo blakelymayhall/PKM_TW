@@ -17,9 +17,9 @@ public class OW_PlayerAnimator : OW_Animator
     protected override void Start()
     {
         base.Start();
-
         walkTime = 0.25f;
         runTime = 0.15f;
+        
         player = GetComponent<OW_Player>();
     }
 

@@ -15,8 +15,8 @@ public class OW_PlayerMechanics : OW_MovingObject
     private OW_Player player;
 
     private bool initMode = false;
-    private Vector3 inputDirection = Vector3.zero;
-    private Vector3 facingDirection = Vector3.zero;
+    private Vector2 inputDirection = Vector2.zero;
+
     private readonly float KEY_HOLD_TIME = 0.15f; 
     private readonly float TARGET_TOLERANCE = 1e-3f;
     //*************************************************************************
@@ -33,6 +33,7 @@ public class OW_PlayerMechanics : OW_MovingObject
         base.Start();
         playerAnimator = GetComponent<OW_PlayerAnimator>();
         player = GetComponent<OW_Player>();
+        SnapToGrid(tilemap);
     }
 
     void Update()
@@ -89,7 +90,7 @@ public class OW_PlayerMechanics : OW_MovingObject
     {
         isSprinting = Input.GetButton("Run"); // Shift Key
     
-        inputDirection = Vector3.zero;
+        inputDirection = Vector2.zero;
         inputDirection.x = (int) Input.GetAxisRaw ("Horizontal");
         inputDirection.y = (int) Input.GetAxisRaw ("Vertical");
         if(inputDirection.x != 0)
@@ -97,7 +98,7 @@ public class OW_PlayerMechanics : OW_MovingObject
             inputDirection.y = 0;
         }
         inputDirection.Normalize();
-        noInput = inputDirection == Vector3.zero;
+        noInput = inputDirection == Vector2.zero;
     }    
 
     private IEnumerator CheckHeld()
@@ -122,8 +123,13 @@ public class OW_PlayerMechanics : OW_MovingObject
 
         while (true)
         {
+            if (!isMoving)
+            {
+                yield break;
+            }
+            
             float inverseMoveTime = 1f / (isSprinting ? sprintMoveTime : walkMoveTime);
-            Vector3 newPostion = Vector3.MoveTowards(
+            Vector2 newPostion = Vector2.MoveTowards(
                 rigidbody2D.position,
                 target,
                 inverseMoveTime * Time.deltaTime);
@@ -132,7 +138,7 @@ public class OW_PlayerMechanics : OW_MovingObject
             float sqrRemainingDistance = (rigidbody2D.position - target).sqrMagnitude;
             if (sqrRemainingDistance < TARGET_TOLERANCE)
             {
-                Vector3 nextTilePosition = target + new Vector2(
+                Vector2 nextTilePosition = target + new Vector2(
                     inputDirection.x * tileSize.x,
                     inputDirection.y * tileSize.y);
                 Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
@@ -146,7 +152,7 @@ public class OW_PlayerMechanics : OW_MovingObject
                 }
                 else 
                 {
-                    target = tilemap.GetCellCenterWorld(nextTileCellPosition);
+                    target = (Vector2)tilemap.GetCellCenterWorld(nextTileCellPosition);
                 }
             }
             yield return null;

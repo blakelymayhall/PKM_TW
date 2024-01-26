@@ -14,27 +14,31 @@ public class NPC_Mechanics : OW_MovingObject
     public Vector3 moveDirection = Vector3.zero;
     public List<Vector2> spinDirections = new();
     public float spinTime = 2f;
+    public int spottingDistance = 9;
     //*************************************************************************
 
     /* PRIVATE VARS */
     //*************************************************************************
     private NPC_Animator animator;
+    private GameObject player;
 
     private int waypointIndex = 1;
     private int spinIndex = 1;
-    private Vector3 facingDirection;
-    private readonly int SPOTTING_DISTANCE = 3;
-    private GameObject player;
     private bool playerSpotted = false;
     //*************************************************************************
 
-    // Start is called before the first frame update
+    void Awake()
+    {
+        player = GameObject.FindWithTag("Player");
+    }
+
     protected override void Start()
     {
         base.Start();
         identity = GetComponent<NPC_Identity>();
         animator = GetComponent<NPC_Animator>();
-        player = GameObject.FindWithTag("Player");
+
+        SnapToGrid(tilemap);
     }
 
     void Update()
@@ -69,12 +73,12 @@ public class NPC_Mechanics : OW_MovingObject
         noInput = false;
         if(!isMoving)
         {
-            bool facingMoveDirection = (Vector2)facingDirection == waypoints[waypointIndex];
+            bool facingMoveDirection = facingDirection == waypoints[waypointIndex];
             facingDirection = waypoints[waypointIndex];
 
             if(!facingMoveDirection)
             {
-                GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
+                animator.UpdateDirectionSprites(facingDirection);
                 if (PlayerInLOS())
                 {
                     return;
@@ -101,10 +105,9 @@ public class NPC_Mechanics : OW_MovingObject
             yield return null;
         }
         facingDirection = spinDirections[spinIndex];
-        animator.DisplaySprite(facingDirection);
+        animator.UpdateDirectionSprites(facingDirection);
         if (PlayerInLOS())
         {
-            GetComponent<NPC_Animator>().UpdateDirectionSprites(facingDirection);
             isMoving = false;
             yield break;
         }
@@ -120,14 +123,14 @@ public class NPC_Mechanics : OW_MovingObject
 
     private bool PlayerInLOS() 
     {
-        Vector3 target = transform.position+SPOTTING_DISTANCE*facingDirection;
+        Vector2 target = (Vector2)transform.position+spottingDistance*tileSize*facingDirection;
 
         // Cast a ray in the facing direction to confirm that 
         // nothing rigid is in our path. Disable this objects collider.
         GetComponent<BoxCollider2D>().enabled = false;
         RaycastHit2D hit = Physics2D.Linecast(transform.position, target);
         GetComponent<BoxCollider2D>().enabled = true;
-
+        
         playerSpotted = hit.transform != null && hit.collider.gameObject == player;
         return playerSpotted;
     }
@@ -135,9 +138,9 @@ public class NPC_Mechanics : OW_MovingObject
     private void MoveToPlayer()
     {
         noInput = false;
-        Vector3 oppositeFacingDirection = -1*facingDirection;
+        Vector2 oppositeFacingDirection = -1*facingDirection;
         Vector3Int playerTile = tilemap.WorldToCell(player.transform.position);
-        Vector3 target = tilemap.GetCellCenterWorld(playerTile)+oppositeFacingDirection;
+        Vector2 target = (Vector2)tilemap.GetCellCenterWorld(playerTile)+tileSize*oppositeFacingDirection;
         Move(target);
         noInput = true;
     }

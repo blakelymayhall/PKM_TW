@@ -11,6 +11,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     public bool noInput = true;
     public bool isMoving = false;
     public bool isSprinting = false;
+    public Vector2 facingDirection;
     //*************************************************************************
 
     /* PROTECTED VARS */
@@ -20,11 +21,6 @@ public abstract class OW_MovingObject : MonoBehaviour
     protected Vector2 tileSize = new(0.32f, 0.32f);
     //*************************************************************************
 
-    /* PRIVATE VARS */
-    //*************************************************************************
-
-    //*************************************************************************
-
     protected virtual void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
@@ -32,18 +28,17 @@ public abstract class OW_MovingObject : MonoBehaviour
 
     // Returns world coordinates of the next tile in the given 
     // normalized direction
-    protected Vector3 GetTargetTile(Vector3 inputDirection, Tilemap tilemap)
+    protected Vector3 GetTargetTile(Vector2 inputDirection, Tilemap tilemap)
     {
-        Vector3 nextTilePosition = transform.position + new Vector3(
+        Vector2 nextTilePosition = (Vector2)transform.position + new Vector2(
             inputDirection.x * tileSize.x,
-            inputDirection.y * tileSize.y,
-            0f);
+            inputDirection.y * tileSize.y);
         Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
-        return tilemap.GetCellCenterWorld(nextTileCellPosition);
+        return (Vector2)tilemap.GetCellCenterWorld(nextTileCellPosition);
     }
 
     // Returns true if it is able to move and false if not. 
-    protected virtual void Move(Vector3 target)
+    protected virtual void Move(Vector2 target)
     {
         if (CanMove(target))
         {
@@ -61,7 +56,7 @@ public abstract class OW_MovingObject : MonoBehaviour
         while (sqrRemainingDistance > float.Epsilon)
         {
             float inverseMoveTime = 1f / (isSprinting ? sprintMoveTime : walkMoveTime);
-            Vector3 newPostion = Vector3.MoveTowards(
+            Vector2 newPostion = Vector2.MoveTowards(
                 rigidbody2D.position,
                 target,
                 inverseMoveTime * Time.deltaTime);
@@ -76,7 +71,7 @@ public abstract class OW_MovingObject : MonoBehaviour
     }
 
     // Method returns false if anything is occupying the tile being moved to
-    protected virtual bool CanMove(Vector3 target)
+    protected virtual bool CanMove(Vector2 target)
     {
         // Cast a ray in the direction of the move to confirm that 
         // nothing rigid is in our path. Disable this objects collider.
@@ -85,5 +80,11 @@ public abstract class OW_MovingObject : MonoBehaviour
         GetComponent<BoxCollider2D>().enabled = true;
 
         return hit.transform == null;
+    }
+
+    protected void SnapToGrid(Tilemap tilemap)
+    {
+        Vector3Int nextTileCellPosition = tilemap.WorldToCell(transform.position);
+        rigidbody2D.MovePosition(tilemap.GetCellCenterWorld(nextTileCellPosition));
     }
 }
