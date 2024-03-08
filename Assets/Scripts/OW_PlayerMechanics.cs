@@ -38,7 +38,6 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     void Update()
     {
-        Debug.Log(player.playerMode);
         switch (player.playerMode)
         {
             case OW_PlayerModes.STANDBY:
