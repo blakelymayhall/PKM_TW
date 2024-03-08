@@ -38,11 +38,16 @@ public abstract class OW_MovingObject : MonoBehaviour
     }
 
     // Returns true if it is able to move and false if not. 
-    protected virtual void Move(Vector2 target)
+    protected virtual bool Move(Vector2 target)
     {
         if (CanMove(target))
         {
             StartCoroutine(SmoothMovement(target));
+            return true;
+        }
+        else 
+        {
+            return false;
         }
     }
 

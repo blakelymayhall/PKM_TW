@@ -17,7 +17,7 @@ public class OW_PlayerMechanics : OW_MovingObject
     private bool initMode = false;
     private Vector2 inputDirection = Vector2.zero;
 
-    private readonly float KEY_HOLD_TIME = 0.15f; 
+    private readonly float KEY_HOLD_TIME = 0.15f;
     private readonly float TARGET_TOLERANCE = 1e-3f;
     //*************************************************************************
 
@@ -38,7 +38,8 @@ public class OW_PlayerMechanics : OW_MovingObject
 
     void Update()
     {
-        switch(player.playerMode)
+        Debug.Log(player.playerMode);
+        switch (player.playerMode)
         {
             case OW_PlayerModes.STANDBY:
                 GetUserInput();
@@ -46,12 +47,12 @@ public class OW_PlayerMechanics : OW_MovingObject
                 {
                     bool facingMoveDirection = facingDirection == inputDirection;
                     facingDirection = inputDirection;
-                    if(!facingMoveDirection)
+                    if (!facingMoveDirection)
                     {
                         playerAnimator.UpdateDirectionSprites(facingDirection);
                     }
-                    
-                    player.playerMode = isMoving || facingMoveDirection ?  
+
+                    player.playerMode = isMoving || facingMoveDirection ?
                         OW_PlayerModes.MOVING : OW_PlayerModes.MOVE_DELAY;
                     initMode = true;
                 }
@@ -68,10 +69,9 @@ public class OW_PlayerMechanics : OW_MovingObject
             case OW_PlayerModes.MOVING:
                 GetUserInput();
 
-                if (initMode)
+                if (initMode && Move(GetTargetTile(inputDirection, tilemap)))
                 {
                     playerAnimator.ShowWalkingSprite();
-                    Move(GetTargetTile(inputDirection, tilemap));
                     initMode = false;
                 }
                 break;
@@ -89,24 +89,24 @@ public class OW_PlayerMechanics : OW_MovingObject
     private void GetUserInput()
     {
         isSprinting = Input.GetButton("Run"); // Shift Key
-    
+
         inputDirection = Vector2.zero;
-        inputDirection.x = (int) Input.GetAxisRaw ("Horizontal");
-        inputDirection.y = (int) Input.GetAxisRaw ("Vertical");
-        if(inputDirection.x != 0)
+        inputDirection.x = (int)Input.GetAxisRaw("Horizontal");
+        inputDirection.y = (int)Input.GetAxisRaw("Vertical");
+        if (inputDirection.x != 0)
         {
             inputDirection.y = 0;
         }
         inputDirection.Normalize();
         noInput = inputDirection == Vector2.zero;
-    }    
+    }
 
     private IEnumerator CheckHeld()
     {
         float startTime = Time.time;
-        while (Time.time-startTime < KEY_HOLD_TIME)
+        while (Time.time - startTime < KEY_HOLD_TIME)
         {
-            if (noInput) 
+            if (noInput)
             {
                 player.playerMode = OW_PlayerModes.STANDBY;
                 yield break;
@@ -127,7 +127,7 @@ public class OW_PlayerMechanics : OW_MovingObject
             {
                 yield break;
             }
-            
+
             float inverseMoveTime = 1f / (isSprinting ? sprintMoveTime : walkMoveTime);
             Vector2 newPostion = Vector2.MoveTowards(
                 rigidbody2D.position,
@@ -138,22 +138,24 @@ public class OW_PlayerMechanics : OW_MovingObject
             float sqrRemainingDistance = (rigidbody2D.position - target).sqrMagnitude;
             if (sqrRemainingDistance < TARGET_TOLERANCE)
             {
+                rigidbody2D.MovePosition(target);
                 Vector2 nextTilePosition = target + new Vector2(
                     inputDirection.x * tileSize.x,
                     inputDirection.y * tileSize.y);
                 Vector3Int nextTileCellPosition = tilemap.WorldToCell(nextTilePosition);
+
                 bool facingMoveDirection = facingDirection == inputDirection;
-                if (noInput || !facingMoveDirection || !CanMove(tilemap.GetCellCenterWorld(nextTileCellPosition)))
+
+                // Handle stop moving
+                bool doNotMove = noInput || !CanMove(tilemap.GetCellCenterWorld(nextTileCellPosition));
+                if (doNotMove || !facingMoveDirection)
                 {
-                    rigidbody2D.MovePosition(target);
+                    isMoving = !doNotMove;
                     player.playerMode = OW_PlayerModes.STANDBY;
-                    isMoving = !noInput;
                     yield break;
                 }
-                else 
-                {
-                    target = (Vector2)tilemap.GetCellCenterWorld(nextTileCellPosition);
-                }
+
+                target = (Vector2)tilemap.GetCellCenterWorld(nextTileCellPosition);
             }
             yield return null;
         }
